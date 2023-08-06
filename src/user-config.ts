@@ -1,14 +1,16 @@
 export const SETTINGS = {
     subscriptions: {
-      '1015537': {
+      'UID1': {
         webhookKeys: [
           'WEBHOOK_A',
+          'WEBHOOK_B',
         ],
         roles: {
-          WEBHOOK_A: [],
+          WEBHOOK_A: ['RoleID1'],
+          WEBHOOK_B: [], //no ping
         }
       },
-      '82251265': {
+      'UID2': {
         webhookKeys: [
           'WEBHOOK_A',
         ],
