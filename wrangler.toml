@@ -5,5 +5,14 @@ compatibility_date = "2023-05-15"
 # Cron Triggers
 # Docs: https://developers.cloudflare.com/workers/platform/triggers/cron-triggers/
 # Configuration: https://developers.cloudflare.com/workers/wrangler/configuration/#triggers
+
+[[kv_namespaces]]
+binding = "POST_CACHE"
+id = "4797a5b5ec8c4363837b6b34e14a7f01"
+
+[[kv_namespaces]]
+binding = "WEBHOOKS"
+id = "b744a7f186f1413f9f88e882263bcdae"
+
 [triggers]
 crons = ["* * * * *"] # * * * * * = run every minute
