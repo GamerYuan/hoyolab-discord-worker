@@ -83,7 +83,7 @@ export const SETTINGS = {
 ```
 
 To follow an account, change their UID field with the account ID. This can be found in the URL bar in the user's account page:
-<img width="283" alt="image" src="https://github.com/GamerYuan/hoyolab-discord-worker/assets/99809097/44551863-2b1e-4aa2-bffc-0a91b9357c75">
+![image](https://github.com/GamerYuan/hoyolab-discord-worker/assets/99809097/934e69db-e8a3-47ff-a4dc-b034737661dd)
 
 Then, configure the webhookKeys. You should use an alias which represents which Webhook(s) you want the notification to be sent to.
 
