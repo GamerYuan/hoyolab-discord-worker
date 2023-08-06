@@ -1,0 +1,1 @@
+# hoyolab-discord-worker
