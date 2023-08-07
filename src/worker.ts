@@ -50,7 +50,7 @@ export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const { TOKEN } = env
 		if (!TOKEN) return new Response('No Token. Functions disabled.');
-		const router = Router({ base: `` });
+		const router = Router({ base: `/${TOKEN}` });
 
 		router
 			.get('/test_fetch/:id', async({params}) => Response.json(await fetchMessageList(params.id)))
