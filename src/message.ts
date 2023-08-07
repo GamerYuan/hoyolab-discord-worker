@@ -88,7 +88,10 @@ export async function getPostDetail(postID: number): Promise<string> {
     const content = JSON.parse(json.data.post.post.structured_content);
     if (Array.isArray(content)) {
         const fullText = content.map(processElement).join('');
-        return `${fullText.substring(0, POST_LENGTH)}...\n\nRead more details in the post!`;
+        if (fullText.length > POST_LENGTH) {
+            return `${fullText.substring(0, POST_LENGTH).trim()}...\n\nRead more details in the post!`;
+        }
+        return `${fullText.trim()}`
     }
     return "";
 }
