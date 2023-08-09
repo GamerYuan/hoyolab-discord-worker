@@ -92,18 +92,21 @@ export async function getPostDetail(postID: number): Promise<string> {
         let final: string = "";
         let currLen: number = 0;
         for (let i = 0; i < retLen; i++) {
-            if (currLen + ret[i].length > POST_LENGTH) {
+            let insertText = ret[i]
+            if (currLen + insertText.length > POST_LENGTH) {
                 var urlRE= new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?([^ ])+");
-                if (ret[i].match(urlRE)) {
-                    final += `${ret[i].trim()}\n\nRead more details in the post!`;
+                if (insertText.match(urlRE)) {
+                    final += `${insertText.trim()}\n\nRead more details in the post!`;
                     break;
                 }
-                final += ret[i];
+                final += insertText;
                 final = `${final.substring(0, POST_LENGTH)}...\n\nRead more details in the post!`;
                 break;
             }
-            final += ret[i];
-            currLen += ret[i].length;
+            // Removes Discord markdown
+            insertText = insertText.replace(/[.*-]/g, (match) => `\\${match}`);
+            final += insertText;
+            currLen += insertText.length;
         }
         return final.trimStart();
         
