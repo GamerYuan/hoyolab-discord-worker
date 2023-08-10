@@ -68,7 +68,11 @@ export const SETTINGS = {
         roles: {
           WEBHOOK_A: ['RoleID1'],
           WEBHOOK_B: [], //no ping
-        }
+        },
+        language: {
+          WEBHOOK_A: 'en-us',
+          WEBHOOK_B: 'zh-cn',
+        },
       },
       'UID2': {
         webhookKeys: [
@@ -76,7 +80,10 @@ export const SETTINGS = {
         ],
         roles: {
           WEBHOOK_A: [],
-        }
+        },
+        language: {
+          WEBHOOK_A: 'ja-jp',
+        },
       },
     }, 
   } as const
@@ -87,7 +94,26 @@ To follow an account, change their UID field with the account ID. This can be fo
 
 Then, configure the webhookKeys. You should use an alias which represents which Webhook(s) you want the notification to be sent to.
 
-Lastly, configure the roles. You can put a Role ID in your Discord server for each webhook, the roles specified will be pinged as the notification is sent. [Learn more](https://www.itgeared.com/how-to-get-role-id-on-discord). You can add multiple roles and separate them by `,`, or leave it empty such that no roles will be pinged as the notification is sent.
+Then, configure the roles. You can put a Role ID in your Discord server for each webhook, the roles specified will be pinged as the notification is sent. [Learn more](https://www.itgeared.com/how-to-get-role-id-on-discord). You can add multiple roles and separate them by `,`, or leave it empty such that no roles will be pinged as the notification is sent.
+
+Lastly, configure the language of the webhook. This will fetch the translated post from HoYoLAB and display it as the translated language in the webhook message. Use the respective abbreviation for the language to configure, you can leave the string blank and it will be defaulted as English. Make sure that every Webhook Alias has its entry in the language property. The list of supported languages and their abbreviation is as follow:
+```
+English: en-us
+Chinese (Simplified): zh-cn
+Chinese (Traditional): zh-tw
+German: de-de
+Spanish: es-es
+French: fr-fr
+Indonesian: id-id
+Italian: it-it
+Japanese: ja-jp
+Korean: ko-kr
+Portuguese: pt-pt
+Russian: ru-ru
+Thai: th-th
+Turkish: tr-tr
+Vietnamese: vi-vn
+```
 
 Make sure to remove unwanted entries of **subscriptions** before deploying.
 

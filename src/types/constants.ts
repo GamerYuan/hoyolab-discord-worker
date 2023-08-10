@@ -3,6 +3,16 @@ export const AVAIL_LANG: string[] = ['[1]: English', '[2]: Simplified Chinese',
     '[8]: Italian', '[9]: Japanese', '[10]: Korean', '[11]: Portuguese', '[12]: Russian', '[13]: Thai',
     '[14]: Turkish', '[15]: Vietnamese'];
 
+export const LANG_DETAILS: string[] = ['Read more details in the post!', '更多详情阅读原文', '更多詳情閱讀原文', 
+    'Weitere Details lesen Sie im Beitrag', 'Lea más detalles en la publicación',
+    'Lire plus de détails dans le post', 'Baca lebih detail di postingan', 'Leggi maggiori dettagli nel post',
+    '詳細については投稿をご覧ください', '게시물에서 자세한 내용 읽기', 'Leia mais detalhes no post', 'Подробнее читайте в посте',
+    'อ่านรายละเอียดเพิ่มเติมในโพสต์', 'Gönderide daha fazla ayrıntı okuyun', 'Đọc thêm chi tiết trong bài viết'];
+
+export const FOOTER_TEXT: string[] = ['Translated with Google', '由谷歌翻译', '由谷歌翻譯', 'Übersetzt mit Google',
+    'Traducido con Google', 'Traduit avec Google', 'Diterjemahkan dengan Google', 'Tradotto con Google', 'Googleで翻訳しました', 
+    'Google로 번역됨', 'Traduzido com o Google', 'Переведено с помощью Google', 'แปลด้วย Google', 'Google ile çevrildi', 'Đã dịch bằng Google'];
+
 export const LANG_ABBR: string[] = ['en-us', 'zh-cn', 'zh-tw', 'de-de', 'es-es', 'fr-fr', 'id-id', 'it-it', 
     'ja-jp', 'ko-kr', 'pt-pt', 'ru-ru', 'th-th', 'tr-tr', 'vi-vn'];
 

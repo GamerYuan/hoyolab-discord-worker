@@ -14,8 +14,9 @@
 
 import { Router } from 'itty-router';
 import { fetchMessageList, onScheduled } from './triggers';
-import { getPostDetail, pushMessage, pushToDiscord } from './message';
+import { fetchPostDetail, buildPostDetail, pushMessage, pushToDiscord } from './message';
 import { PostSummary } from './types/hoyolab_api';
+import { LANG_ABBR } from './types/constants';
 
 export interface Env {
 	// Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
@@ -53,18 +54,24 @@ export default {
 		const router = Router({ base: `/${TOKEN}` });
 
 		router
-			.get('/test_fetch/:id', async({params}) => Response.json(await fetchMessageList(params.id)))
+			.get('/test_fetch/:id', async({params, query}) => {
+				const lang = query?.lang as string == undefined ? 'en-us' : query?.lang as string;
+				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
+				return Response.json(await fetchMessageList(params.id, lang))
+			})
 			.get('/test_kv/:id', async({params}) => {
 				const list = await env.POST_CACHE.get<PostSummary[]>(`feed_${params.id}`, 'json');
 				return Response.json(list);
 			})
 			.get('/test_discord/:id', async({params, query}) => {
-				const list = await fetchMessageList(params!.id);
+				const lang = query?.lang as string == undefined ? 'en-us' : query?.lang as string;
+				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
+				const list = (await fetchMessageList(params!.id, lang)).flatMap(x => Number(x.post.post_id));
 				const webhook_kv = query?.webhook as string;
 				if (!webhook_kv) return new Response('Webhook query not found!')
 				const webhook = await env.WEBHOOKS.get(webhook_kv);
 				if (!webhook) return new Response(`Webhook: ${webhook_kv} Not Found!`);
-				await pushToDiscord(list, webhook, [])
+				await pushToDiscord(list, webhook, [], lang);
 				return new Response('OK');
 			})
 			.get('/test_webhook', async({query}) => {
@@ -78,12 +85,18 @@ export default {
 				await pushMessage(content, webhook);
 				return new Response('OK');
 			})
-			.get('/test_post/:id', async({params}) => {
-				const data = await getPostDetail(Number(params!.id));
-				if (data == "") {
-					return new Response("No Data");
-				}
-				return new Response(data);
+			.get('/test_post/:id', async({params, query}) => {
+				const lang = query?.lang as string == undefined ? 'en-us' : query?.lang as string;
+				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
+				const data = await fetchPostDetail(Number(params!.id), lang);
+				return Response.json(data);
+			})
+			.get('/test_message/:id', async({params, query}) => {
+				const lang = query?.lang as string == undefined ? 'en-us' : query?.lang as string;
+				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
+				const data = await fetchPostDetail(Number(params!.id), lang);
+				const message = await buildPostDetail(data);
+				return new Response(message);
 			})
 		return router.handle(request).catch(() => new Response("Error"));
 	}

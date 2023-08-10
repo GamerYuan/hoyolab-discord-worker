@@ -2,17 +2,20 @@ import { Env } from './worker';
 import { HoyolabList, PostSummary } from './types/hoyolab_api';
 import { SETTINGS } from './user-config';
 import { pushToDiscord } from './message';
+import { LANG_ABBR } from './types/constants';
 
 let env: Env;
 const API = 'https://bbs-api-os.hoyolab.com/community/post/wapi/userPost'
 
-export async function fetchMessageList(userID: string): Promise<PostSummary[]> {
+export async function fetchMessageList(userID: string, lang: string = 'en-us'): Promise<PostSummary[]> {
     const target = `${API}?size=10&uid=${userID}`;
 
     const response = await fetch(target, {
         headers: {
             Accept: 'application/json',
             'User-Agent': 'Mozilla/5.0',
+            'X-Rpc-Language': lang,
+            'X-Rpc-Show-Translated': 'true',
         },
         method: 'GET',
     })
@@ -28,18 +31,18 @@ export async function fetchMessageList(userID: string): Promise<PostSummary[]> {
 }
 
 // Get new posts posted since last trigger
-export function filterPost(list: PostSummary[], last: number): PostSummary[] {
-    const filtered = list.filter(post => Number(post.post.post_id) > last);
+export function filterPost(list: number[], last: number): number[] {
+    const filtered = list.filter(x => x > last);
     return filtered;
 }
 
-async function processSingleUser(userID: string, webhooks: readonly string[], roles:{ readonly [k in typeof webhooks[number]]: readonly string[]}, force = false) {
+async function processSingleUser(userID: string, webhooks: readonly string[], roles:{ readonly [k in typeof webhooks[number]]: readonly string[]}, language:{ readonly [k in typeof webhooks[number]]: string}, force = false) {
     const KV_KEY = `feed_${userID}`;
-    const updateKV = async (list: PostSummary[]) => {
-        await env.POST_CACHE.put(KV_KEY, list[0].post.post_id);
+    const updateKV = async (list: number[]) => {
+        await env.POST_CACHE.put(KV_KEY, list[0].toString());
     }
 
-    let list = await fetchMessageList(userID);
+    let list = (await fetchMessageList(userID)).flatMap(x => Number(x.post.post_id)); 
     if (list.length == 0) {
         return;
     }
@@ -63,7 +66,8 @@ async function processSingleUser(userID: string, webhooks: readonly string[], ro
             console.log(`No Webhook URL for key: ${key}, UID: ${userID} skipped`);
             continue;
         }
-        await pushToDiscord(newPosts, webhook, roles[key] ?? []);
+        console.log(language[key]);
+        await pushToDiscord(newPosts, webhook, roles[key] ?? [], language[key] == '' || !LANG_ABBR.includes(language[key].trim()) ? 'en-us' : language[key]);
     }
     console.log(`Sent ${newPosts.length} posts.`)
     await updateKV(list);
@@ -73,6 +77,6 @@ export async function onScheduled(_env: Env) {
     env = _env;
     const subs = SETTINGS.subscriptions;
     for (const [uid, options] of Object.entries(subs)) {
-        await processSingleUser(uid, options.webhookKeys, options.roles);
+        await processSingleUser(uid, options.webhookKeys, options.roles, options.language);
     }
 }
