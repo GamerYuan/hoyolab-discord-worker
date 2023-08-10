@@ -6,6 +6,11 @@ With this repository, you can receive post notifications from HoYoLAB as webhook
 
 Cloudflare Workers is a freemium network service by Cloudflare. You can host your services for free on Cloudflare Workers with some quota limitations. [Learn more](https://workers.cloudflare.com/)
 
+# FEATURES
+- Automatically receives webhook messages when the accounts you follow post on HoYoLAB (up to 1min delay due to CRON limitations)
+- Well-formatted webhook messages
+- Configure primary language of webhook messages (translation made with HoYoLAB's API, official posts will be displayed in its respective language)
+
 # SETUP
 
 First register an account on [Cloudflare](https://www.cloudflare.com/en-gb/).
