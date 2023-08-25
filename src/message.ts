@@ -4,6 +4,7 @@ import { LANG_DETAILS, LANG_ABBR, FOOTER_TEXT } from './types/constants';
 
 const POST_LENGTH: number = 500;
 const POST_DATA = 'https://bbs-api-os.hoyolab.com/community/post/wapi/getPostFull';
+const URL_RE= new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?([^ ])+");
 
 async function buildMessage(postID: number, lang: string): Promise<Embed> {
     const postDetail = await fetchPostDetail(postID, lang);
@@ -101,8 +102,7 @@ export async function buildPostDetail(post: PostData): Promise<string> {
             let insertText = ret[i]
             if (currLen + insertText.length > POST_LENGTH) {
                 const detailString = LANG_DETAILS[LANG_ABBR.findIndex(x => x === post.data.post.post.lang)];
-                var urlRE= new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?([^ ])+");
-                if (insertText.match(urlRE)) {
+                if (insertText.match(URL_RE)) {
                     final += `${insertText.trim()}\n\n${detailString}`;
                     break;
                 }
@@ -111,7 +111,9 @@ export async function buildPostDetail(post: PostData): Promise<string> {
                 break;
             }
             // Removes Discord markdown
-            insertText = insertText.replace(/[.*-]/g, (match) => `\\${match}`);
+            if (!insertText.match(URL_RE)) {
+                insertText = insertText.replace(/[.*-]/g, (match) => `\\${match}`);
+            }
             final += insertText;
             currLen += insertText.length;
         }
