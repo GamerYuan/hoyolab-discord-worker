@@ -12,6 +12,7 @@
     "wrangler": "^3.0.0"
   },
   "dependencies": {
-    "itty-router": "^4.0.14"
+    "itty-router": "^4.0.14",
+    "package-lock.json": "^1.0.0"
   }
 }

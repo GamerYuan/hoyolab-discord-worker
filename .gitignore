@@ -3,5 +3,7 @@ README.md
 .prettierrc
 wrangler.toml
 .dev.vars
+.wrangler
+node_modules
 
 src/user-config.ts
