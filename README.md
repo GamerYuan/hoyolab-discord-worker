@@ -25,7 +25,7 @@ Clone this repository to your local machine:
 git clone https://github.com/GamerYuan/hoyolab-discord-worker.git
 ```
 
-Finally setup the repository by running the following command:
+Finally setup the repository by running the following command in the `hoyolab-discord-worker` folder:
 ```
 npm i
 ```
