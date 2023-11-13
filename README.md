@@ -183,3 +183,27 @@ npx wrangler deploy
 - `/TOKEN/test_webhook/?webhook=[Webhook Alias]` : sends a test message to the Webhook specified by the Webhook Alias on Discord
 - `/TOKEN/test_post/:id` : returns the 500 word summary for the post specified by the ID.
 - `/TOKEN/test_discord/:uid?webhook=[Webhook Alias]` : sends the last 10 articles of the user specified by the UID to the Webhook specified by the Webhook Alias on Discord
+
+## Limitations
+
+All Cloudflare Workers Limitations can be found in this [article](https://developers.cloudflare.com/workers/platform/limits/). The following will detail some limitations potentially impactful to this deployment. 
+
+### Worker KV
+
+The free tier of `Worker KV` supports 100,000 Read Operations and 1000 Write Operations daily, shared across all `Workers` and `Pages`. 
+
+Each subscription incurs the following usage:
+- 2 Read Operations:
+  - Retrieve last sent post data
+  - Retrieve Discord Webhook URL
+- 1 Write Operation when sending a new batch of embeds
+
+This totals to an average of 2880 Operations (Write Operations are negligible) daily if Cron Triggers are scheduled every minute (default). You can manage around 34 account `subscriptions` at this rate. 
+
+### Cron Triggers
+
+The free tier of `Cloudflare Workers` supports 5 `Cron Triggers` total, shared across all `Workers`.
+
+### Open Connections
+
+The free tier of `Cloudflare Workers` supports up to 6 simultaneous open connections. Additional connections will be placed in a queue, incurring more CPU time. This may limit the maximum number of `subscriptions`.
