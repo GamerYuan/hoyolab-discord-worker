@@ -6,12 +6,12 @@ With this repository, you can receive post notifications from HoYoLAB as webhook
 
 Cloudflare Workers is a freemium network service by Cloudflare. You can host your services for free on Cloudflare Workers with some quota limitations. [Learn more](https://workers.cloudflare.com/)
 
-# FEATURES
+## Features
 - Automatically receives webhook messages when the accounts you follow post on HoYoLAB (up to 1min delay due to CRON limitations)
 - Well-formatted webhook messages
 - Configure primary language of webhook messages (translation made with HoYoLAB's API, official posts will be displayed in its respective language)
 
-# SETUP
+## Setup
 
 First register an account on [Cloudflare](https://www.cloudflare.com/en-gb/).
 
@@ -30,7 +30,7 @@ Finally setup the repository by running the following command in the `hoyolab-di
 npm i
 ```
 
-# INSTALLING
+## Deploying
 
 Open a Terminal in the local repository folder. Then login to Cloudflare:
 ```
@@ -39,8 +39,7 @@ npx wrangler login
 
 Then open [Cloudflare Workers Dashboard](https://dash.cloudflare.com/) on your browser
 
-Head over to Workers & Pages > KV, and create 2 new namespaces: **hyl-post-cache** and **hyl-webhook**
-*You can choose a different name as long as they serve their purpose*
+Head over to Workers & Pages > KV, and create 2 new namespaces: `hyl-post-cache` and `hyl-webhook`. *You can choose a different name as long as they serve their purpose*
 
 Then copy their IDs and open wrangler.toml in the local repository folder.
 
@@ -61,13 +60,13 @@ id = "b744a7f186f1413f9f88e882263bcdae" # <-- change this to the ID of hyl-webho
 crons = ["* * * * *"] # * * * * * = run every minute
 ```
 
-Change the ID of **POST_CACHE** and **WEBHOOKS** kv_namespaces to the newly created KV Namespaces respectively
+Change the ID of `POST_CACHE` and `WEBHOOKS` kv_namespaces to the `Namespace ID` newly created KV Namespaces respectively
 
 You can also change the crons (timed trigger) if you do not wish to update the feed every minute. See this [article](https://developers.cloudflare.com/workers/configuration/cron-triggers/) for cron syntax.
 
 Then open `src/user-config.ts` and configure the accounts to follow and webhooks to use.
 
-```
+```typescript
 export const SETTINGS = {
     subscriptions: {
       'UID1': {
@@ -100,11 +99,31 @@ export const SETTINGS = {
 ```
 
 To follow an account, change their UID field with the account ID. This can be found in the URL bar in the user's account page:
-![image](https://github.com/GamerYuan/hoyolab-discord-worker/assets/99809097/934e69db-e8a3-47ff-a4dc-b034737661dd)
+![image](https://github.com/GamerYuan/hoyolab-discord-worker/assets/HYVID.png)
 
 Then, configure the webhookKeys. You should use an alias which represents which Webhook(s) you want the notification to be sent to.
 
-Then, configure the roles. You can put a Role ID in your Discord server for each webhook, the roles specified will be pinged as the notification is sent. [Learn more](https://www.itgeared.com/how-to-get-role-id-on-discord). You can add multiple roles and separate them by `,`, or leave it empty such that no roles will be pinged as the notification is sent.
+Then, configure the roles. You can put a Role ID in your Discord server for each webhook, the roles specified will be pinged as the notification is sent. [Learn more](https://www.itgeared.com/how-to-get-role-id-on-discord). You can add multiple roles and separate them by `,` or leave it empty such that no roles will be pinged as the notification is sent. 
+
+Example:
+```typescript
+export const SETTINGS = {
+    subscriptions: {
+      '1015537': {
+        webhookKeys: [
+          'WEBHOOK_A',
+        ],
+        roles: {
+          WEBHOOK_A: ['704963547248703428', '130349517473811392'],
+        },
+        language: {
+          WEBHOOK_A: 'en-us',
+        },
+      },
+    }
+  } as const
+```
+*The `Role IDs` are randomly generated for demonstration purposes*
 
 Lastly, configure the language of the webhook. This will fetch the translated post from HoYoLAB and display it as the translated language in the webhook message. Use the respective abbreviation for the language to configure, you can leave the string blank and it will be defaulted as English. Make sure that every Webhook Alias has its entry in the language property. The list of supported languages and their abbreviation is as follow:
 ```
@@ -125,28 +144,31 @@ Turkish: tr-tr
 Vietnamese: vi-vn
 ```
 
-Make sure to remove unwanted entries of **subscriptions** before deploying.
+**Remove unwanted entries of `subscriptions` before deploying.**
 
 Finally, deploy this worker before you configure Discord Webhooks.
 ```
 npx wrangler deploy
 ```
 
-# CONFIGURING DISCORD WEBHOOKS
+## Configuring Discord Webhook
 
 To configure a Discord Webhook and link it to this service, first go to your server and select a channel that the webhook will send its message to. 
 
 Click on Edit Channel, go to Integrations > Webhooks, and create a New Webhook (Or use an existing webhook). Then copy its Webhook URL.
 
-Go to your Cloudflare Dashboard, Workers & Pages > KV, and open the **hyl-webhooks** namespace (or whatever you have named it previously with the same purpose). Then add an entry. The Key will be the **Webhook Alias** you have configured in the `user-config.ts` file, and the Value will be the **Webhook URL** you have copied from Discord. Once you are done, click Add Entry, and you should see the new entry showing up in the page.
+Go to your Cloudflare Dashboard, Workers & Pages > KV, and open the `hyl-webhooks` namespace (or whatever you have named it previously with the same purpose). Then add an entry. The Key will be the `Webhook Alias` you have provided in the `user-config.ts` file, and the Value will be the `Webhook URL` you have copied from Discord. Once you are done, click Add Entry, and you should see the new entry showing up in the page.
+
+Example:
+![image](https://github.com/GamerYuan/hoyolab-discord-worker/assets/WebhookKeys.png)
 
 Now you have fully configured the service. You can add more accounts to follow and Webhook Aliases as you go, by modifying `user-config.ts` with the new entries.
 
-# CONFIGURING TOKEN FOR API TESTS
+## Configuring Token for API Tests
 
-A secret Token has been implemented for API tests. You can test the individual functionalities of this service if you setup a token. 
+A secret `Token` has been implemented for API tests. You can test the individual functionalities of this service if you setup a token. 
 
-To setup a Token, type in the following commands:
+To setup a `Token`, type in the following commands:
 ```
 npx wrangler secret put TOKEN
 
@@ -155,7 +177,7 @@ npx wrangler secret put TOKEN
 npx wrangler deploy
 ```
 
-## Available API tests
+### Available API tests
 - `/TOKEN/test_fetch/:uid` : returns the fetched timeline for the specified UID
 - `/TOKEN/test_kv/:uid` : returns the cached data for the specified UID
 - `/TOKEN/test_webhook/?webhook=[Webhook Alias]` : sends a test message to the Webhook specified by the Webhook Alias on Discord
