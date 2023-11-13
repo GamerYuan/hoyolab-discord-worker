@@ -43,7 +43,7 @@ Head over to Workers & Pages > KV, and create 2 new namespaces: `hyl-post-cache`
 
 Then copy their IDs and open wrangler.toml in the local repository folder.
 
-```
+```toml
 name = "hoyolab-discord-worker"
 main = "src/worker.ts"
 compatibility_date = "2023-05-15"
