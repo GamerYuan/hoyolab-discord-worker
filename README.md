@@ -99,6 +99,7 @@ export const SETTINGS = {
 ```
 
 To follow an account, change their UID field with the account ID. This can be found in the URL bar in the user's account page:
+
 ![image](https://github.com/GamerYuan/hoyolab-discord-worker/blob/main/assets/HYVID.png)
 
 Then, configure the webhookKeys. You should use an alias which represents which Webhook(s) you want the notification to be sent to.
@@ -160,6 +161,7 @@ Click on Edit Channel, go to Integrations > Webhooks, and create a New Webhook (
 Go to your Cloudflare Dashboard, Workers & Pages > KV, and open the `hyl-webhooks` namespace (or whatever you have named it previously with the same purpose). Then add an entry. The Key will be the `Webhook Alias` you have provided in the `user-config.ts` file, and the Value will be the `Webhook URL` you have copied from Discord. Once you are done, click Add Entry, and you should see the new entry showing up in the page.
 
 Example:
+
 ![image](https://github.com/GamerYuan/hoyolab-discord-worker/blob/main/assets/WebhookKeys.png)
 
 Now you have fully configured the service. You can add more accounts to follow and Webhook Aliases as you go, by modifying `user-config.ts` with the new entries.
