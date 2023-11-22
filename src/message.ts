@@ -129,16 +129,10 @@ function processElement(element: any): string {
 
     if (element.hasOwnProperty('attributes') && element['attributes'].hasOwnProperty('link')) {
         const link = element['attributes']['link'];
-
-        if (link.includes("?")) {
-            const linkSplit = link.substring(0, link.indexOf("?"));
-            return `[${insertVal}](${linkSplit.trim()})`;
+        if (link.trim() === insertVal.trim()) {
+            return insertVal;
         } else {
-            if (link.trim() === insertVal.trim()) {
-                return insertVal;
-            } else {
-                return `[${insertVal}](${link.trim()})`;
-            }
+            return `[${insertVal}](${link.trim()})`;
         }
     } else {
         return insertVal;
