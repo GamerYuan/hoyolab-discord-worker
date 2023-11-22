@@ -30,3 +30,11 @@ export const EVENT_DETAILS_MODIFIER: string[] =
     ['Event Details', '活动说明', '活動說明', 'Aktionsbeschreibung', 'Detalles del evento', "Détails de l'événement",
     'Penjelasan Event', 'Descrizione', 'イベント説明', '이벤트 안내', 'Descrição do Evento', 'Описание события', 'คำอธิบายกิจกรรม',
     'Etkinlik Kuralları', 'Giới Thiệu Sự Kiện'];
+
+export const DEFAULT_HEADER_DICT = {
+    Accept: 'application/json',
+    'X-Rpc-Language': 'en-us',
+    'X-Rpc-Show-Translated': 'true',
+    'X-Rpc-App_version': '2.43.0',
+    'User-Agent': 'Mozilla/5.0',
+}

@@ -2,7 +2,7 @@ import { Env } from './worker';
 import { HoyolabList, PostSummary } from './types/hoyolab_api';
 import { SETTINGS } from './user-config';
 import { pushToDiscord } from './message';
-import { LANG_ABBR } from './types/constants';
+import { LANG_ABBR, DEFAULT_HEADER_DICT } from './types/constants';
 
 let env: Env;
 const API = 'https://bbs-api-os.hoyolab.com/community/post/wapi/userPost'
@@ -10,15 +10,12 @@ const API = 'https://bbs-api-os.hoyolab.com/community/post/wapi/userPost'
 export async function fetchMessageList(userID: string, lang: string = 'en-us'): Promise<PostSummary[]> {
     const target = `${API}?size=10&uid=${userID}`;
 
+    const requestHeader = DEFAULT_HEADER_DICT;
+    requestHeader['X-Rpc-Language'] = lang;
     const response = await fetch(target, {
-        headers: {
-            Accept: 'application/json',
-            'User-Agent': 'Mozilla/5.0',
-            'X-Rpc-Language': lang,
-            'X-Rpc-Show-Translated': 'true',
-        },
+        headers: requestHeader,
         method: 'GET',
-    })
+    });
 
     const json = await response.json<HoyolabList>();
     let list = json.data.list;

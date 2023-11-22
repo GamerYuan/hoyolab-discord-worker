@@ -1,10 +1,10 @@
 import { Message, Embed } from './types/discord_embed'
 import { PostData } from './types/hoyolab_post'
-import { LANG_DETAILS, LANG_ABBR, FOOTER_TEXT } from './types/constants';
+import { LANG_DETAILS, LANG_ABBR, FOOTER_TEXT, DEFAULT_HEADER_DICT } from './types/constants';
 
 const POST_LENGTH: number = 500;
 const POST_DATA = 'https://bbs-api-os.hoyolab.com/community/post/wapi/getPostFull';
-const URL_RE= new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?([^ ])+");
+const URL_RE = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?([^ ])+");
 
 async function buildMessage(postID: number, lang: string): Promise<Embed> {
     const postDetail = await fetchPostDetail(postID, lang);
@@ -62,11 +62,11 @@ export async function pushToDiscord(posts: number[], webhooks: string, roles: re
 export async function pushMessage(content: any, webhook: string) {
     const response = await fetch(webhook, {
         method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-            },
-            body: JSON.stringify(content),
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        },
+        body: JSON.stringify(content),
     })
     if (!response.ok) {
         console.error(`Webhook Failed`, response.status, await response.json())
@@ -75,13 +75,10 @@ export async function pushMessage(content: any, webhook: string) {
 
 export async function fetchPostDetail(postID: number, lang: string): Promise<PostData> {
     const target = `${POST_DATA}?post_id=${postID}`;
+    const requestHeader = DEFAULT_HEADER_DICT;
+    requestHeader['X-Rpc-Language'] = lang;
     const response = await fetch(target, {
-        headers: {
-            Accept: 'application/json',
-            'X-Rpc-Language': lang,
-            'X-Rpc-Show-Translated': 'true',
-            'User-Agent': 'Mozilla/5.0',
-        },
+        headers: requestHeader,
         method: 'GET',
     });
 
@@ -118,7 +115,7 @@ export async function buildPostDetail(post: PostData): Promise<string> {
             currLen += insertText.length;
         }
         return final.trimStart();
-        
+
     }
     return "";
 }
@@ -127,23 +124,23 @@ function processElement(element: any): string {
     const insertVal = element.hasOwnProperty('insert') ? element['insert'] : '';
 
     if (typeof insertVal !== 'string') {
-      return '';
+        return '';
     }
-  
+
     if (element.hasOwnProperty('attributes') && element['attributes'].hasOwnProperty('link')) {
-      const link = element['attributes']['link'];
-  
-      if (link.includes("?")) {
-        const linkSplit = link.substring(0, link.indexOf("?"));
-        return `[${insertVal}](${linkSplit.trim()})`;
-      } else {
-        if (link.trim() === insertVal.trim()) {
-          return insertVal;
+        const link = element['attributes']['link'];
+
+        if (link.includes("?")) {
+            const linkSplit = link.substring(0, link.indexOf("?"));
+            return `[${insertVal}](${linkSplit.trim()})`;
         } else {
-          return `[${insertVal}](${link.trim()})`;
+            if (link.trim() === insertVal.trim()) {
+                return insertVal;
+            } else {
+                return `[${insertVal}](${link.trim()})`;
+            }
         }
-      }
     } else {
-      return insertVal;
+        return insertVal;
     }
 }
