@@ -131,6 +131,8 @@ function processElement(element: any): string {
         const link = element['attributes']['link'];
         if (link.trim() === insertVal.trim()) {
             return insertVal;
+        } else if (insertVal.trim().match(URL_RE)) {
+            return link.trim();
         } else {
             return `[${insertVal}](${link.trim()})`;
         }
