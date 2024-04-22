@@ -1,7 +1,7 @@
 import { Env } from './worker';
 import { HoyolabList, PostSummary } from './types/hoyolab_api';
 import { SETTINGS } from './user-config';
-import { pushToDiscord } from './message';
+import { pushToDiscord, sendErrorMessage } from './message';
 import { LANG_ABBR, DEFAULT_HEADER_DICT } from './types/constants';
 
 let env: Env;
@@ -70,10 +70,44 @@ async function processSingleUser(userID: string, webhooks: readonly string[], ro
     await updateKV(list);
 }
 
+async function processError(message: string, webhooks: readonly string[]) {
+    const KEY = "last_error_time"
+    const now = Date.now();
+    const last = await env.POST_CACHE.get(KEY);
+    if (!last) {
+        await env.POST_CACHE.put(KEY, now.toString())
+        for (let key of webhooks) {
+            const webhook = await env.WEBHOOKS.get(key)
+            if (!webhook) {
+                console.log(`No Webhook URL for key: ${key}, send error message skipped`);
+                continue;
+            }
+            await sendErrorMessage(message, key)
+        }
+        return
+      }
+    
+      if (now - parseInt(last) > 3600000) {
+        for (let key of webhooks) {
+            const webhook = await env.WEBHOOKS.get(key)
+            if (!webhook) {
+                console.log(`No Webhook URL for key: ${key}, send error message skipped`);
+                continue;
+            }
+            await sendErrorMessage(message, key)
+        }
+        await env.POST_CACHE.put(KEY, Date.now().toString())
+      }
+}
+
 export async function onScheduled(_env: Env) {
     env = _env;
     const subs = SETTINGS.subscriptions;
     for (const [uid, options] of Object.entries(subs)) {
-        await processSingleUser(uid, options.webhookKeys, options.roles, options.language);
+        try {
+            await processSingleUser(uid, options.webhookKeys, options.roles, options.language);
+        } catch (e) {
+            await processError((e as Error).message, options.webhookKeys)
+        }
     }
 }

@@ -120,6 +120,13 @@ export async function buildPostDetail(post: PostData): Promise<string> {
     return "";
 }
 
+export async function sendErrorMessage(message: string, webhook: string) {
+    const payload: Message = {
+        content: message,
+    }
+    await pushMessage(payload, webhook);
+}
+
 function processElement(element: any): string {
     const insertVal = element.hasOwnProperty('insert') ? element['insert'] : '';
 
