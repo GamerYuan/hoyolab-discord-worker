@@ -34,6 +34,7 @@ export function filterPost(list: number[], last: number): number[] {
 }
 
 async function processSingleUser(userID: string, webhooks: readonly string[], roles:{ readonly [k in typeof webhooks[number]]: readonly string[]}, language:{ readonly [k in typeof webhooks[number]]: string}, force = false) {
+    console.log(`Processing user: ${userID}`);
     const KV_KEY = `feed_${userID}`;
     const updateKV = async (list: number[]) => {
         await env.POST_CACHE.put(KV_KEY, list[0].toString());
@@ -57,10 +58,12 @@ async function processSingleUser(userID: string, webhooks: readonly string[], ro
             return;
         }
     }
+    console.log(`Found ${newPosts.length} new posts.`);
+
     for (let key of webhooks) {
         const webhook = await env.WEBHOOKS.get(key)
         if (!webhook) {
-            console.log(`No Webhook URL for key: ${key}, UID: ${userID} skipped`);
+            console.error(`No Webhook URL for key: ${key}, UID: ${userID} skipped`);
             continue;
         }
         console.log(language[key]);

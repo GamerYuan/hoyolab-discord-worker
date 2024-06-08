@@ -60,6 +60,7 @@ export async function pushToDiscord(posts: number[], webhooks: string, roles: re
 }
 
 export async function pushMessage(content: any, webhook: string) {
+    console.log(`Payload: ${JSON.stringify(content)}`);
     const response = await fetch(webhook, {
         method: 'POST',
         headers: {
