@@ -85,7 +85,7 @@ async function processError(message: string, webhooks: readonly string[]) {
                 console.log(`No Webhook URL for key: ${key}, send error message skipped`);
                 continue;
             }
-            await sendErrorMessage(message, key)
+            await sendErrorMessage(message, webhook)
         }
         return
       }
@@ -97,7 +97,7 @@ async function processError(message: string, webhooks: readonly string[]) {
                 console.log(`No Webhook URL for key: ${key}, send error message skipped`);
                 continue;
             }
-            await sendErrorMessage(message, key)
+            await sendErrorMessage(message, webhook)
         }
         await env.POST_CACHE.put(KEY, Date.now().toString())
       }
