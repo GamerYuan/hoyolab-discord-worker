@@ -86,9 +86,9 @@ async function processSingleUser(
 			)
 		);
 	}
-	console.log(`Sent ${newPosts.length} posts.`);
-	pushJobs.push(updateKV(list));
 	await Promise.all(pushJobs);
+	console.log(`Sent ${newPosts.length} posts.`);
+	await updateKV(list);
 }
 
 export async function onScheduled(_env: Env) {
