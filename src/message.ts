@@ -4,7 +4,7 @@ import { LANG_DETAILS, LANG_ABBR, FOOTER_TEXT, DEFAULT_HEADER_DICT } from './typ
 
 const POST_LENGTH: number = 500;
 const POST_DATA = 'https://bbs-api-os.hoyolab.com/community/post/wapi/getPostFull';
-const URL_RE = new RegExp('([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?([^ ])+');
+const URL_RE = new RegExp('(https?://)(.*)\b');
 
 async function buildMessage(postID: number, lang: string): Promise<Embed> {
 	const postDetail = await fetchPostDetail(postID, lang);
