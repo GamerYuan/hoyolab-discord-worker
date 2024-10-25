@@ -105,52 +105,55 @@ export async function buildPostDetail(post: PostData): Promise<string> {
 		return '';
 	}
 	const content = JSON.parse(post.data.post.post.structured_content);
-	if (Array.isArray(content)) {
-		const ret = content.map(processElement);
-		const retLen = ret.length;
-		let final: string = '';
-		let currLen: number = 0;
-		for (let i = 0; i < retLen; i++) {
-			let insertText = ret[i];
-			if (currLen + insertText.length > POST_LENGTH) {
-				const detailString = LANG_DETAILS[LANG_ABBR.findIndex((x) => x === post.data.post.post.lang)];
-				if (insertText.match(URL_RE)) {
-					final += `${insertText.trim()}\n\n${detailString}`;
-					break;
-				}
-				final += insertText;
+	if (!Array.isArray(content)) return '';
+
+	const ret = content.map(processElement);
+	let final: string = '';
+	let currLen: number = 0;
+
+	for (let i = 0; i < ret.length; i++) {
+		let elem = ret[i];
+		if (elem[0] === 0) continue;
+
+		let insertText = elem[1];
+
+		final += insertText;
+		currLen += insertText.length;
+
+		if (currLen <= POST_LENGTH) continue;
+
+		const detailString = LANG_DETAILS[LANG_ABBR.findIndex((x) => x === post.data.post.post.lang)];
+		switch (elem[0]) {
+			case 1:
 				final = `${final.substring(0, POST_LENGTH)}...\n\n${detailString}`;
 				break;
-			}
-			// Removes Discord markdown
-			if (!insertText.match(URL_RE)) {
-				insertText = insertText.replace(/[.*-]/g, (match) => `\\${match}`);
-			}
-			final += insertText;
-			currLen += insertText.length;
+			case 2:
+				final += `\n\n${detailString}`;
+				break;
 		}
-		return final.trimStart();
+		break;
 	}
-	return '';
+
+	return final.trimStart();
 }
 
-function processElement(element: any): string {
+function processElement(element: any): [number, string] {
 	const insertVal = element.hasOwnProperty('insert') ? element['insert'] : '';
 
 	if (typeof insertVal !== 'string') {
-		return '';
+		return [0, ''];
 	}
 
 	if (element.hasOwnProperty('attributes') && element['attributes'].hasOwnProperty('link')) {
 		const link = element['attributes']['link'];
 		if (link.trim() === insertVal.trim()) {
-			return insertVal;
+			return [2, insertVal];
 		} else if (insertVal.trim().match(URL_RE)) {
-			return link.trim();
+			return [2, link.trim()];
 		} else {
-			return `[${insertVal}](${link.trim()})`;
+			return [2, `[${insertVal}](${link.trim()})`];
 		}
 	} else {
-		return insertVal;
+		return [1, insertVal.replace(/[.*-]/g, (match) => `\\${match}`)];
 	}
 }
