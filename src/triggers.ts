@@ -98,5 +98,5 @@ export async function onScheduled(_env: Env) {
 	for (const [uid, options] of Object.entries(subs)) {
 		jobs.push(processSingleUser(uid, options.webhookKeys, options.roles, options.language));
 	}
-	await Promise.all(jobs);
+	await Promise.allSettled(jobs);
 }

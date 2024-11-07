@@ -153,6 +153,8 @@ function processElement(element: any): [number, string] {
 		} else {
 			return [2, `[${insertVal}](${link.trim()})`];
 		}
+	} else if (insertVal.trim().match(URL_RE)) {
+		return [2, insertVal.trim()];
 	} else {
 		return [1, insertVal.replace(/[.*-]/g, (match) => `\\${match}`)];
 	}
