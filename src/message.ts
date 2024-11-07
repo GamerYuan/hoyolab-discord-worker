@@ -5,6 +5,7 @@ import { LANG_DETAILS, LANG_ABBR, FOOTER_TEXT, DEFAULT_HEADER_DICT } from './typ
 const POST_LENGTH: number = 500;
 const POST_DATA = 'https://bbs-api-os.hoyolab.com/community/post/wapi/getPostFull';
 const URL_RE = new RegExp('(https?://)(.*)\b');
+const ESC_RE = new RegExp('[.*-]');
 
 async function buildMessage(postID: number, lang: string): Promise<Embed> {
 	const postDetail = await fetchPostDetail(postID, lang);
@@ -153,9 +154,14 @@ function processElement(element: any): [number, string] {
 		} else {
 			return [2, `[${insertVal}](${link.trim()})`];
 		}
-	} else if (insertVal.trim().match(URL_RE)) {
-		return [2, insertVal.trim()];
 	} else {
-		return [1, insertVal.replace(/[.*-]/g, (match) => `\\${match}`)];
+		return [
+			1,
+			insertVal
+				.replace(URL_RE, (url) => `\0${url}\0`)
+				.split('\0')
+				.map((part) => (URL_RE.test(part) ? part : part.replace(ESC_RE, '\\$&')))
+				.join(''),
+		];
 	}
 }
