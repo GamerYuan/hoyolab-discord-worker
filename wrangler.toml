@@ -9,28 +9,13 @@ compatibility_date = "2023-05-15"
 [[kv_namespaces]]
 binding = "POST_CACHE"
 id = "4797a5b5ec8c4363837b6b34e14a7f01"
-preview_id = "c5f2cb42f7a34cc58ec4fb57eb74bfc6"
 
 [[kv_namespaces]]
 binding = "WEBHOOKS"
 id = "b744a7f186f1413f9f88e882263bcdae"
-preview_id = "ff8bfae802d3436eb332ddd67fd84065"
 
 [triggers]
 crons = ["1/5 * * * *"]
 
-[placement]
-mode = "smart"
-
 [observability]
 enabled = true
-
-[[env.dev.kv_namespaces]]
-binding = "POST_CACHE"
-id = "10f4cf1b054942c6a8a076c400395a04"
-preview_id = "10f4cf1b054942c6a8a076c400395a04"
-
-[[env.dev.kv_namespaces]]
-binding = "WEBHOOKS"
-id = "4e6f97a1f3fc497d991c3e57065366aa"
-preview_id = "4e6f97a1f3fc497d991c3e57065366aa"
