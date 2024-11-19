@@ -78,8 +78,7 @@ Change the ID of `POST_CACHE` and `WEBHOOKS` kv_namespaces to the `Namespace ID`
 
 You can also change the `crons` (timed trigger) if you do not wish to update the feed every minute. See this [article](https://developers.cloudflare.com/workers/configuration/cron-triggers/) for CRON syntax.
 
-> [!TIP]
-> [CRON Expression Generator Tool](https://crontab.guru/).
+> [!TIP] > [CRON Expression Generator Tool](https://crontab.guru/).
 
 Then open `src/user-config.ts` and configure the accounts to follow and webhooks to use.
 
@@ -197,6 +196,8 @@ npx wrangler secret put [TOKEN]
 
 npx wrangler deploy
 ```
+
+The base URL for the API tests can be found in Workers & Pages > hoyolab-discord-worker > Settings > Domains & Routes
 
 ### Available API tests
 
