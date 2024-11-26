@@ -15,7 +15,7 @@
 import { Router } from 'itty-router';
 import { fetchMessageList, onScheduled } from './triggers';
 import { fetchPostDetail, buildPostDetail, pushMessage, pushToDiscord } from './message';
-import { PostSummary } from './types/hoyolab_api';
+import { Post } from './types/hoyolab_post';
 import { LANG_ABBR } from './types/constants';
 
 export interface Env {
@@ -49,55 +49,55 @@ export default {
 	},
 
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		const { TOKEN } = env
+		const { TOKEN } = env;
 		if (!TOKEN) return new Response('No Token. Functions disabled.');
 		const router = Router({ base: `/${TOKEN}` });
 
 		router
-			.get('/test_fetch/:id', async({params, query}) => {
-				const lang = query?.lang as string == undefined ? 'en-us' : query?.lang as string;
+			.get('/test_fetch/:id', async ({ params, query }) => {
+				const lang = (query?.lang as string) == undefined ? 'en-us' : (query?.lang as string);
 				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
-				return Response.json(await fetchMessageList(params.id, lang))
+				return Response.json(await fetchMessageList(params.id, lang));
 			})
-			.get('/test_kv/:id', async({params}) => {
-				const list = await env.POST_CACHE.get<PostSummary[]>(`feed_${params.id}`, 'json');
+			.get('/test_kv/:id', async ({ params }) => {
+				const list = await env.POST_CACHE.get<Post[]>(`feed_${params.id}`, 'json');
 				return Response.json(list);
 			})
-			.get('/test_discord/:id', async({params, query}) => {
-				const lang = query?.lang as string == undefined ? 'en-us' : query?.lang as string;
+			.get('/test_discord/:id', async ({ params, query }) => {
+				const lang = (query?.lang as string) == undefined ? 'en-us' : (query?.lang as string);
 				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
-				const list = (await fetchMessageList(params!.id, lang)).flatMap(x => Number(x.post.post_id));
+				const list = (await fetchMessageList(params!.id, lang)).flatMap((x) => Number(x.post.post_id));
 				const webhook_kv = query?.webhook as string;
-				if (!webhook_kv) return new Response('Webhook query not found!')
+				if (!webhook_kv) return new Response('Webhook query not found!');
 				const webhook = await env.WEBHOOKS.get(webhook_kv);
 				if (!webhook) return new Response(`Webhook: ${webhook_kv} Not Found!`);
 				await pushToDiscord(list, webhook, [], lang);
 				return new Response('OK');
 			})
-			.get('/test_webhook', async({query}) => {
+			.get('/test_webhook', async ({ query }) => {
 				const webhook_kv = query?.webhook as string;
 				if (!webhook_kv) return new Response('Webhook query not found!');
 				const webhook = await env.WEBHOOKS.get(webhook_kv);
 				if (!webhook) return new Response(`Webhook: ${webhook_kv} Not Found!`);
 				const content = {
 					content: `${webhook_kv} Test`,
-				}
+				};
 				await pushMessage(content, webhook);
 				return new Response('OK');
 			})
-			.get('/test_post/:id', async({params, query}) => {
-				const lang = query?.lang as string == undefined ? 'en-us' : query?.lang as string;
+			.get('/test_post/:id', async ({ params, query }) => {
+				const lang = (query?.lang as string) == undefined ? 'en-us' : (query?.lang as string);
 				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
 				const data = await fetchPostDetail(Number(params!.id), lang);
 				return Response.json(data);
 			})
-			.get('/test_message/:id', async({params, query}) => {
-				const lang = query?.lang as string == undefined ? 'en-us' : query?.lang as string;
+			.get('/test_message/:id', async ({ params, query }) => {
+				const lang = (query?.lang as string) == undefined ? 'en-us' : (query?.lang as string);
 				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
 				const data = await fetchPostDetail(Number(params!.id), lang);
 				const message = await buildPostDetail(data);
 				return new Response(message);
-			})
-		return router.handle(request).catch(() => new Response("Error"));
-	}
+			});
+		return router.handle(request).catch(() => new Response('Error'));
+	},
 };

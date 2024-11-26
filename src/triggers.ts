@@ -1,13 +1,14 @@
 import { Env } from './worker';
-import { HoyolabList, PostSummary } from './types/hoyolab_api';
+import { HoyolabList } from './types/hoyolab_api';
 import { SETTINGS } from './user-config';
 import { pushToDiscord } from './message';
 import { LANG_ABBR, DEFAULT_HEADER_DICT } from './types/constants';
+import { Post } from './types/hoyolab_post';
 
 let env: Env;
 const API = 'https://bbs-api-os.hoyolab.com/community/post/wapi/userPost';
 
-export async function fetchMessageList(userID: string, lang: string = 'en-us'): Promise<PostSummary[]> {
+export async function fetchMessageList(userID: string, lang: string = 'en-us'): Promise<Post[]> {
 	const target = `${API}?size=10&uid=${userID}`;
 
 	const requestHeader = DEFAULT_HEADER_DICT;

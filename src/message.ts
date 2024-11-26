@@ -1,5 +1,5 @@
 import { Message, Embed } from './types/discord_embed';
-import { PostData } from './types/hoyolab_post';
+import { PostData, StructuredInsert } from './types/hoyolab_post';
 import { LANG_DETAILS, LANG_ABBR, FOOTER_TEXT, DEFAULT_HEADER_DICT } from './types/constants';
 
 const POST_LENGTH: number = 500;
@@ -105,7 +105,7 @@ export async function buildPostDetail(post: PostData): Promise<string> {
 	if (!post.data.post.post.structured_content) {
 		return '';
 	}
-	const content = JSON.parse(post.data.post.post.structured_content);
+	const content: StructuredInsert[] = JSON.parse(post.data.post.post.structured_content);
 	if (!Array.isArray(content)) return '';
 
 	const ret = content.map(processElement);
@@ -114,7 +114,9 @@ export async function buildPostDetail(post: PostData): Promise<string> {
 
 	for (let i = 0; i < ret.length; i++) {
 		let elem = ret[i];
-		if (elem[0] === 0) continue;
+		if (elem[0] === ElementType.IMAGE || elem[0] === ElementType.EMOJI || elem[0] === ElementType.NONE) {
+			continue;
+		}
 
 		let insertText = elem[1];
 
@@ -125,43 +127,73 @@ export async function buildPostDetail(post: PostData): Promise<string> {
 
 		const detailString = LANG_DETAILS[LANG_ABBR.findIndex((x) => x === post.data.post.post.lang)];
 		switch (elem[0]) {
-			case 1:
-				final = `${final.substring(0, POST_LENGTH)}...\n\n${detailString}`;
+			case ElementType.TEXT:
+				const lastBoundary = final.substring(0, POST_LENGTH).lastIndexOf(' ');
+				final = `${final.substring(0, lastBoundary)}...\n\n${detailString}`;
 				break;
-			case 2:
+			case ElementType.LINK || ElementType.VOTE || ElementType.VIDEO:
 				final += `\n\n${detailString}`;
 				break;
 		}
+
 		break;
 	}
 
 	return final.trimStart();
 }
 
-function processElement(element: any): [number, string] {
-	const insertVal = element.hasOwnProperty('insert') ? element['insert'] : '';
+function processElement(element: StructuredInsert): [ElementType, string] {
+	const { insert, attributes } = element;
 
-	if (typeof insertVal !== 'string') {
-		return [0, ''];
+	if (attributes && attributes.link) {
+		const link = attributes.link;
+		const insertText = insert as string;
+
+		if (link.trim() === insertText.trim()) {
+			return [ElementType.LINK, insertText];
+		} else if (insertText.trim().match(URL_RE)) {
+			return [ElementType.LINK, link.trim()];
+		} else {
+			return [ElementType.LINK, `[${insertText}](${link.trim()})`];
+		}
 	}
 
-	if (element.hasOwnProperty('attributes') && element['attributes'].hasOwnProperty('link')) {
-		const link = element['attributes']['link'];
-		if (link.trim() === insertVal.trim()) {
-			return [2, insertVal];
-		} else if (insertVal.trim().match(URL_RE)) {
-			return [2, link.trim()];
-		} else {
-			return [2, `[${insertVal}](${link.trim()})`];
-		}
-	} else {
+	if (typeof insert === 'string') {
 		return [
-			1,
-			insertVal
+			ElementType.TEXT,
+			insert
 				.replace(URL_RE, (url) => `\0${url}\0`)
 				.split('\0')
 				.map((part) => (URL_RE.test(part) ? part : part.replace(ESC_RE, '\\$&')))
 				.join(''),
 		];
 	}
+
+	if ('image' in insert) {
+		return [ElementType.IMAGE, insert.image];
+	}
+
+	if ('video' in insert) {
+		return [ElementType.VIDEO, `[[VIDEO]](${insert.video})\n`];
+	}
+
+	if ('vote' in insert) {
+		return [ElementType.VOTE, `\n[VOTE]: ${insert.vote.title}\n`];
+	}
+
+	if ('backup' in insert) {
+		return [ElementType.EMOJI, insert.emoticon.url];
+	}
+
+	return [ElementType.NONE, ''];
+}
+
+enum ElementType {
+	TEXT,
+	LINK,
+	IMAGE,
+	VIDEO,
+	VOTE,
+	EMOJI,
+	NONE,
 }
