@@ -95,7 +95,7 @@ export default {
 				const lang = (query?.lang as string) == undefined ? 'en-us' : (query?.lang as string);
 				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
 				const data = await fetchPostDetail(Number(params!.id), lang);
-				const message = await buildPostDetail(data);
+				const message = await buildPostDetail(data, 1000);
 				return new Response(message);
 			});
 		return router.handle(request).catch(() => new Response('Error'));

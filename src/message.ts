@@ -2,12 +2,11 @@ import { Message, Embed } from './types/discord_embed';
 import { PostData, StructuredInsert } from './types/hoyolab_post';
 import { LANG_DETAILS, LANG_ABBR, FOOTER_TEXT, DEFAULT_HEADER_DICT } from './types/constants';
 
-const POST_LENGTH: number = 500;
 const POST_DATA = 'https://bbs-api-os.hoyolab.com/community/post/wapi/getPostFull';
 const URL_RE = new RegExp('(https?://)(.*)\b');
 const ESC_RE = new RegExp('[.*-]');
 
-async function buildMessage(postID: number, lang: string): Promise<Embed> {
+async function buildMessage(postID: number, lang: string, postLen: number): Promise<Embed> {
 	const postDetail = await fetchPostDetail(postID, lang);
 	const base: Partial<Embed> = {
 		color: 7436279,
@@ -26,7 +25,7 @@ async function buildMessage(postID: number, lang: string): Promise<Embed> {
 		},
 		timestamp: new Date(postDetail.data.post.post.created_at * 1000),
 		title: postDetail.data.post.post.subject,
-		description: await buildPostDetail(postDetail),
+		description: await buildPostDetail(postDetail, postLen),
 	};
 
 	if (postDetail.data.post.cover_list.length > 0) {
@@ -45,10 +44,11 @@ async function buildMessage(postID: number, lang: string): Promise<Embed> {
 export async function pushToDiscord(posts: number[], webhooks: string, roles: readonly string[] = [], lang: string = 'en-us') {
 	const list = webhooks.split(',');
 	// Sends from oldest to newest
+	const postLen = Math.max(600, Math.min(1000, 6000 / posts.length));
 	const embeds = await Promise.all(
 		posts
 			.slice(0, 10)
-			.map(async (post) => await buildMessage(post, lang))
+			.map(async (post) => await buildMessage(post, lang, postLen))
 			.reverse()
 	);
 	const webhookPayload: Message = {
@@ -101,7 +101,7 @@ export async function fetchPostDetail(postID: number, lang: string): Promise<Pos
 	return await response.json<PostData>();
 }
 
-export async function buildPostDetail(post: PostData): Promise<string> {
+export async function buildPostDetail(post: PostData, postLen: number): Promise<string> {
 	if (!post.data.post.post.structured_content) {
 		return '';
 	}
@@ -110,7 +110,7 @@ export async function buildPostDetail(post: PostData): Promise<string> {
 
 	const ret = content.map(processElement);
 	let final: string = '';
-	let currLen: number = 0;
+	let currLen: number = post.data.post.post.subject.length;
 
 	for (let i = 0; i < ret.length; i++) {
 		let elem = ret[i];
@@ -123,12 +123,12 @@ export async function buildPostDetail(post: PostData): Promise<string> {
 		final += insertText;
 		currLen += insertText.length;
 
-		if (currLen <= POST_LENGTH) continue;
+		if (currLen <= postLen) continue;
 
 		const detailString = LANG_DETAILS[LANG_ABBR.findIndex((x) => x === post.data.post.post.lang)];
 		switch (elem[0]) {
 			case ElementType.TEXT:
-				const lastBoundary = final.substring(0, POST_LENGTH).lastIndexOf(' ');
+				const lastBoundary = final.substring(0, postLen).lastIndexOf(' ');
 				final = `${final.substring(0, lastBoundary)}...\n\n${detailString}`;
 				break;
 			case ElementType.LINK || ElementType.VOTE || ElementType.VIDEO:
