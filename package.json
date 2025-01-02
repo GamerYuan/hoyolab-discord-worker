@@ -12,7 +12,9 @@
     "wrangler": "^3.19.0"
   },
   "dependencies": {
+    "cookie": "^1.0.2",
     "itty-router": "^4.0.14",
-    "package-lock.json": "^1.0.0"
+    "package-lock.json": "^1.0.0",
+    "path-to-regexp": "^8.2.0"
   }
 }
