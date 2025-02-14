@@ -3,8 +3,8 @@ import { PostData, StructuredInsert } from './types/hoyolab_post';
 import { LANG_DETAILS, LANG_ABBR, FOOTER_TEXT, DEFAULT_HEADER_DICT } from './types/constants';
 
 const POST_DATA = 'https://bbs-api-os.hoyolab.com/community/post/wapi/getPostFull';
-const URL_RE = new RegExp('(https?://)(.*)\\b', 'g');
-const ESC_RE = new RegExp('((?<=^\\d)\\.)|(\\*)|(^\\-)', 'g');
+const URL_RE = new RegExp(/(https?:\/\/)(.*)\b/, 'g');
+const ESC_RE = new RegExp(/((?<=^\d)\.)|(\*)|(^\-)/, 'gm');
 
 async function buildMessage(postID: number, lang: string, postLen: number): Promise<Embed> {
 	const postDetail = await fetchPostDetail(postID, lang);
