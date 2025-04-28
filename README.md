@@ -106,6 +106,7 @@ export const SETTINGS = {
 			},
 		},
 	},
+	use_components: false,
 } as const;
 ```
 
@@ -135,6 +136,7 @@ export const SETTINGS = {
 			},
 		},
 	},
+	use_components: false,
 } as const;
 ```
 
@@ -168,6 +170,12 @@ Finally, deploy this worker again before you configure Discord Webhooks.
 ```
 npx wrangler deploy
 ```
+
+### Enabling Discord Components V2
+
+Components V2 support has been added with this commit. To enable Components V2, simply change the `use_components` option to `true` in `user-config.ts`.
+
+_Components V2 support is still in preview, please file any issues or feedback you have regarding Components V2 support in the Issues tab_
 
 ## Configuring Discord Webhook
 
