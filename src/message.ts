@@ -2,7 +2,6 @@ import { Message, Embed } from './types/discord_embed';
 import { InsertCard, InsertVideo, PostData, PostDetail, StructuredInsert, Vote } from './types/hoyolab_post';
 import { LOCALISATION_STRINGS, DEFAULT_HEADER_DICT } from './types/localisation';
 import { Button, Component, Container, MediaGallery, Section, Separator, TextDisplay } from './types/components_v2';
-// Import from the new config.json file
 import SETTINGS from '../config.json';
 
 const POST_DATA = 'https://bbs-api-os.hoyolab.com/community/post/wapi/getPostFull';
