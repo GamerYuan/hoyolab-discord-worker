@@ -1,6 +1,6 @@
 import { Message, Embed } from './types/discord_embed';
 import { InsertCard, InsertVideo, PostData, PostDetail, StructuredInsert, Vote } from './types/hoyolab_post';
-import { LOCALISATION_STRINGS, LANG_ABBR, DEFAULT_HEADER_DICT } from './types/constants';
+import { LOCALISATION_STRINGS, DEFAULT_HEADER_DICT } from './types/localisation';
 import { Button, Component, Container, MediaGallery, Section, Separator, TextDisplay } from './types/components_v2';
 // Import from the new config.json file
 import SETTINGS from '../config.json';
@@ -297,11 +297,12 @@ export function buildPostDetailComponent(post: PostData, postLen: number): Compo
 
 				for (let j = 0; j < article.card_group.article_cards.length && j < 3 && components.length < COMPONENT_LIMIT; j++) {
 					const articleSection = new Section();
-					articleSection.components.push(new TextDisplay(article.card_group.article_cards[j].info.title));
-					articleSection.components.push(new TextDisplay(`-# by ${article.card_group.article_cards[j].user.nickname}`));
-					articleSection.accessory = new Button('View Article Here!', 5);
+					articleSection.components.push(
+						new TextDisplay(`${article.card_group.article_cards[j].info.title}\n-# ${article.card_group.article_cards[j].user.nickname}`)
+					);
+					articleSection.accessory = new Button(LOCALISATION_STRINGS[currentLang].article_button, 5);
 					articleSection.accessory.url = `https://www.hoyolab.com/article/${article.card_group.article_cards[j].meta.meta_id}`;
-					currLen += article.card_group.article_cards[j].info.title.length + 6 + article.card_group.article_cards[j].user.nickname.length;
+					currLen += article.card_group.article_cards[j].info.title.length + 3 + article.card_group.article_cards[j].user.nickname.length;
 					components.push(articleSection);
 				}
 				break;

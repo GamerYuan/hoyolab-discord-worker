@@ -3,7 +3,7 @@ import { HoyolabList } from './types/hoyolab_api';
 // Import from the new config.json file
 import SETTINGS from '../config.json';
 import { pushToDiscord } from './message';
-import { LANG_ABBR, DEFAULT_HEADER_DICT } from './types/constants';
+import { LANG_ABBR, DEFAULT_HEADER_DICT } from './types/localisation';
 import { Post } from './types/hoyolab_post';
 
 let env: Env;

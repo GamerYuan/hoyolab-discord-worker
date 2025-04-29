@@ -22,6 +22,7 @@ export type LocalisationStrings = {
 	footer: string;
 	video: string;
 	video_button: string;
+	article_button: string;
 	vote_button: string;
 };
 
@@ -32,6 +33,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Translated',
 		video: 'Video',
 		video_button: 'Watch Video Here!',
+		article_button: 'View Article Here!',
 		vote_button: 'Vote Here!',
 	},
 	'zh-cn': {
@@ -39,6 +41,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: '已翻译',
 		video: '视频',
 		video_button: '在此观看视频！',
+		article_button: '在此查看文章！',
 		vote_button: '在此投票！',
 	},
 	'zh-tw': {
@@ -46,6 +49,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: '已翻譯',
 		video: '影片',
 		video_button: '在此觀看影片！',
+		article_button: '在此查看文章！',
 		vote_button: '在此投票！',
 	},
 	'de-de': {
@@ -53,6 +57,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Übersetzt',
 		video: 'Video',
 		video_button: 'Video hier ansehen!',
+		article_button: 'Artikel hier ansehen!',
 		vote_button: 'Hier abstimmen!',
 	},
 	'es-es': {
@@ -60,6 +65,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Traducido',
 		video: 'Vídeo',
 		video_button: '¡Ver vídeo aquí!',
+		article_button: '¡Ver artículo aquí!',
 		vote_button: '¡Vota aquí!',
 	},
 	'fr-fr': {
@@ -67,6 +73,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Traduit',
 		video: 'Vidéo',
 		video_button: 'Regarder la vidéo ici !',
+		article_button: "Voir l'article ici !",
 		vote_button: 'Votez ici !',
 	},
 	'id-id': {
@@ -74,6 +81,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Diterjemahkan',
 		video: 'Video',
 		video_button: 'Tonton Video Di Sini!',
+		article_button: 'Lihat Artikel Di Sini!',
 		vote_button: 'Vote Di Sini!',
 	},
 	'it-it': {
@@ -81,6 +89,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Tradotto',
 		video: 'Video',
 		video_button: 'Guarda il video qui!',
+		article_button: "Visualizza l'articolo qui!",
 		vote_button: 'Vota qui!',
 	},
 	'ja-jp': {
@@ -88,6 +97,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: '翻訳しました',
 		video: '動画',
 		video_button: 'ここで動画を見る！',
+		article_button: 'ここで記事を見る！',
 		vote_button: 'ここで投票！',
 	},
 	'ko-kr': {
@@ -95,6 +105,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: '번역됨',
 		video: '비디오',
 		video_button: '여기서 비디오 보기!',
+		article_button: '여기서 기사 보기!',
 		vote_button: '여기서 투표하세요!',
 	},
 	'pt-pt': {
@@ -102,6 +113,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Traduzido',
 		video: 'Vídeo',
 		video_button: 'Assista ao vídeo aqui!',
+		article_button: 'Ver artigo aqui!',
 		vote_button: 'Vote aqui!',
 	},
 	'ru-ru': {
@@ -109,6 +121,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Переведено',
 		video: 'Видео',
 		video_button: 'Смотреть видео здесь!',
+		article_button: 'Посмотреть статью здесь!',
 		vote_button: 'Голосовать здесь!',
 	},
 	'th-th': {
@@ -116,6 +129,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'แปลแล้ว',
 		video: 'วิดีโอ',
 		video_button: 'ดูวิดีโอที่นี่!',
+		article_button: 'ดูบทความที่นี่!',
 		vote_button: 'โหวตที่นี่!',
 	},
 	'tr-tr': {
@@ -123,6 +137,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Çevrildi',
 		video: 'Video',
 		video_button: 'Videoyu Buradan İzleyin!',
+		article_button: 'Makaleyi Buradan Görüntüleyin!',
 		vote_button: 'Buradan Oy Verin!',
 	},
 	'vi-vn': {
@@ -130,6 +145,7 @@ export const LOCALISATION_STRINGS: Record<string, LocalisationStrings> = {
 		footer: 'Đã dịch',
 		video: 'Video',
 		video_button: 'Xem Video Tại Đây!',
+		article_button: 'Xem Bài Viết Tại Đây!',
 		vote_button: 'Bình Chọn Tại Đây!',
 	},
 };

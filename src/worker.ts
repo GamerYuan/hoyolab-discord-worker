@@ -16,7 +16,7 @@ import { Router } from 'itty-router';
 import { fetchMessageList, onScheduled } from './triggers';
 import { fetchPostDetail, buildPostDetail, pushMessage, pushToDiscord, buildPostDetailComponent } from './message';
 import { Post } from './types/hoyolab_post';
-import { LANG_ABBR } from './types/constants';
+import { LANG_ABBR } from './types/localisation';
 
 export interface Env {
 	// Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
