@@ -80,69 +80,45 @@ You can also change the `crons` (timed trigger) if you do not wish to update the
 
 > [!TIP] > [CRON Expression Generator Tool](https://crontab.guru/).
 
-Then open `src/user-config.ts` and configure the accounts to follow and webhooks to use.
+Then open `config.json` and configure the accounts to follow and webhooks to use.
 
-```typescript
-export const SETTINGS = {
-	subscriptions: {
-		UID1: {
-			webhookKeys: ['WEBHOOK_A', 'WEBHOOK_B'],
-			roles: {
-				WEBHOOK_A: ['RoleID1'],
-				WEBHOOK_B: [], //no ping
-			},
-			language: {
-				WEBHOOK_A: 'en-us',
-				WEBHOOK_B: 'zh-cn',
-			},
-		},
-		UID2: {
-			webhookKeys: ['WEBHOOK_A'],
-			roles: {
-				WEBHOOK_A: [],
-			},
-			language: {
-				WEBHOOK_A: 'ja-jp',
-			},
-		},
-	},
-	use_components: false,
-} as const;
+```json
+{
+	"subscriptions": [
+		{
+			"uid": 1015537,
+			"webhooks": [
+				{
+					"key": "WEBHOOK_A",
+					"roles": ["704963547248703428", "130349517473811392"],
+					"language": "en-us"
+				},
+				{
+					"key": "WEBHOOK_B",
+					"roles": [],
+					"language": "zh-cn"
+				}
+			]
+		}
+	],
+	"use_components": true
+}
 ```
 
-To follow an account, change their UID field with the account ID. This can be found in the URL bar in the user's account page:
+Each object within the `subscriptions` array represents a HoYoLAB user account you want to follow.
 
-![image](https://github.com/GamerYuan/hoyolab-discord-worker/blob/main/assets/HYVID.png)
-
-Then, configure the `webhookKeys`. You should use an alias which represents which Webhook(s) you want the notification to be sent to.
-
-> [!TIP]
-> You can use any name as the alias as long as it does not contain any spaces and symbols
-
-Then, configure the roles. You can put a Role ID in your Discord server for each webhook, the roles specified will be pinged as the notification is sent. [Learn more](https://www.itgeared.com/how-to-get-role-id-on-discord). You can add multiple roles and separate them by `,`. No roles will be pinged if the field is left empty.
-
-Example:
-
-```typescript
-export const SETTINGS = {
-	subscriptions: {
-		'1015537': {
-			webhookKeys: ['WEBHOOK_A'],
-			roles: {
-				WEBHOOK_A: ['704963547248703428', '130349517473811392'],
-			},
-			language: {
-				WEBHOOK_A: 'en-us',
-			},
-		},
-	},
-	use_components: false,
-} as const;
-```
+- `uid`: The HoYoLAB User ID. This can be found in the URL bar on the user's account page:
+  ![image](https://github.com/GamerYuan/hoyolab-discord-worker/blob/main/assets/HYVID.png)
+- `webhooks`: An array of webhook configurations for this user. Each object in this array defines where and how notifications for this user should be sent.
+  - `key`: An alias (string) representing the Discord Webhook you want the notification sent to. This key must match an entry you create in the Cloudflare KV `hyl-webhooks` namespace.
+    > [!TIP]
+    > You can use any name as the alias as long as it does not contain any spaces and symbols.
+  - `roles`: An array of Role IDs (strings) from your Discord server. The specified roles will be pinged when a notification is sent via this webhook configuration. [Learn more](https://www.itgeared.com/how-to-get-role-id-on-discord). Leave the array empty (`[]`) if no roles should be pinged.
+  - `language`: The preferred language for the post content fetched from HoYoLAB. Use the abbreviations listed below. If left blank (`""`) or invalid, it defaults to English (`en-us`).
 
 <sub>The `Role IDs` are randomly generated for demonstration purposes</sub>
 
-Lastly, configure the language of the webhook. This will fetch the translated post from HoYoLAB and display it in the translated language in the webhook message. Use the respective abbreviation to configure the preferred language or you can leave the string blank and it will be defaulted as English. Make sure that every Webhook Alias has the `language` property. The list of supported languages and their abbreviation is as follow:
+The list of supported languages and their abbreviation is as follow:
 
 ```
 English: en-us
@@ -163,7 +139,7 @@ Vietnamese: vi-vn
 ```
 
 > [!IMPORTANT]
-> Remove unwanted entries of `subscriptions` before deploying.
+> Modify the example `subscriptions` in `config.json` with your desired UIDs and webhook configurations before deploying. Remove any example entries you don't need.
 
 Finally, deploy this worker again before you configure Discord Webhooks.
 
@@ -173,7 +149,7 @@ npx wrangler deploy
 
 ### Enabling Discord Components V2
 
-Components V2 support has been added with this commit. To enable Components V2, simply change the `use_components` option to `true` in `user-config.ts`.
+Components V2 support has been added with this commit. To enable Components V2, simply change the `use_components` option to `true` in `config.json`.
 
 _Components V2 support is still in preview, please file any issues or feedback you have regarding Components V2 support in the Issues tab_
 
@@ -183,13 +159,13 @@ To configure a Discord Webhook and link it to this service, first go to your ser
 
 Click on Edit Channel, go to Integrations > Webhooks, and create a New Webhook (Or use an existing webhook). Then copy its Webhook URL.
 
-Go to your Cloudflare Dashboard, Workers & Pages > KV, and open the `hyl-webhooks` namespace (or whatever you have named it previously with the same purpose). Then add an entry. The Key will be the `Webhook Alias` you have provided in the `user-config.ts` file, and the Value will be the `Webhook URL` you have copied from Discord. Once you are done, click Add Entry, and you should see the new entry showing up in the page.
+Go to your Cloudflare Dashboard, Workers & Pages > KV, and open the `hyl-webhooks` namespace (or whatever you have named it previously with the same purpose). Then add an entry. The Key will be the `Webhook Alias` you have provided in the `config.json` file, and the Value will be the `Webhook URL` you have copied from Discord. Once you are done, click Add Entry, and you should see the new entry showing up in the page.
 
 Example:
 
 ![image](https://github.com/GamerYuan/hoyolab-discord-worker/blob/main/assets/WebhookKeys.png)
 
-Now you have fully configured the service. You can add more accounts to follow and Webhook Aliases as you go, by modifying `user-config.ts` with the new entries.
+Now you have fully configured the service. You can add more accounts to follow and Webhook Aliases as you go, by modifying `config.json` with the new entries.
 
 ## Configuring Token for API Tests
 

@@ -1,6 +1,7 @@
 import { Env } from './worker';
 import { HoyolabList } from './types/hoyolab_api';
-import { SETTINGS } from './user-config';
+// Import from the new config.json file
+import SETTINGS from '../config.json';
 import { pushToDiscord } from './message';
 import { LANG_ABBR, DEFAULT_HEADER_DICT } from './types/constants';
 import { Post } from './types/hoyolab_post';
@@ -34,11 +35,16 @@ export function filterPost(list: number[], last: number): number[] {
 	return filtered;
 }
 
+// Define a type for the webhook configuration within the new structure
+interface WebhookConfig {
+	key: string;
+	roles: readonly string[];
+	language: string;
+}
+
 async function processSingleUser(
-	userID: string,
-	webhooks: readonly string[],
-	roles: { readonly [k in (typeof webhooks)[number]]: readonly string[] },
-	language: { readonly [k in (typeof webhooks)[number]]: string },
+	userID: number, // Changed to number to match JSON
+	webhooksConfig: readonly WebhookConfig[], // Use the new interface
 	force = false
 ) {
 	console.log(`Processing user: ${userID}`);
@@ -47,7 +53,8 @@ async function processSingleUser(
 		await env.POST_CACHE.put(KV_KEY, list[0].toString());
 	};
 
-	let fetchMessage = fetchMessageList(userID).then((m) => m.flatMap((x) => Number(x.post.post_id)));
+	// Fetch messages using the default language initially, specific languages handled later
+	let fetchMessage = fetchMessageList(String(userID)).then((m) => m.flatMap((x) => Number(x.post.post_id)));
 	const postCache = env.POST_CACHE.get<number>(KV_KEY);
 
 	const [list, last] = await Promise.all([fetchMessage, postCache]);
@@ -67,37 +74,44 @@ async function processSingleUser(
 		if (!force) {
 			return;
 		}
+		// If forcing, use the latest post ID for testing/re-sending
+		newPosts = [list[0]];
 	}
-	console.log(`Found ${newPosts.length} new posts.`);
+	console.log(`Found ${newPosts.length} new posts for UID ${userID}.`);
 
 	const pushJobs = [];
 
-	for (let key of webhooks) {
-		const webhook = await env.WEBHOOKS.get(key);
+	// Iterate through the webhook configurations for this user
+	for (let config of webhooksConfig) {
+		const webhook = await env.WEBHOOKS.get(config.key);
 		if (!webhook) {
-			console.error(`No Webhook URL for key: ${key}, UID: ${userID} skipped`);
+			console.error(`No Webhook URL for key: ${config.key}, UID: ${userID} skipped`);
 			continue;
 		}
 		pushJobs.push(
 			pushToDiscord(
 				newPosts,
 				webhook,
-				roles[key] ?? [],
-				language[key] == '' || !LANG_ABBR.includes(language[key].trim()) ? 'en-us' : language[key]
+				config.roles ?? [], // Use roles from the specific webhook config
+				config.language == '' || !LANG_ABBR.includes(config.language.trim()) ? 'en-us' : config.language // Use language from the specific webhook config
 			)
 		);
 	}
 	await Promise.all(pushJobs);
-	console.log(`Sent ${newPosts.length} posts.`);
-	await updateKV(list);
+	console.log(`Sent ${newPosts.length} posts for UID ${userID}.`);
+	// Update KV only if not forcing (to avoid resetting the 'last sent' marker during tests)
+	if (!force) {
+		await updateKV(list);
+	}
 }
 
 export async function onScheduled(_env: Env) {
 	env = _env;
-	const subs = SETTINGS.subscriptions;
+	const subs = SETTINGS.subscriptions; // Now an array
 	const jobs = [];
-	for (const [uid, options] of Object.entries(subs)) {
-		jobs.push(processSingleUser(uid, options.webhookKeys, options.roles, options.language));
+	// Iterate through the array of subscriptions
+	for (const subscription of subs) {
+		jobs.push(processSingleUser(subscription.uid, subscription.webhooks));
 	}
 	await Promise.allSettled(jobs);
 }

@@ -6,5 +6,3 @@ wrangler.toml
 .wrangler
 node_modules
 .vscode
-
-src/user-config.ts
