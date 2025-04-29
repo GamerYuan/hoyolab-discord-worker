@@ -307,16 +307,18 @@ export interface VoteSummary {
 }
 
 export interface StructuredInsert {
-	insert: InsertImage | InsertVideo | Vote | Emoji | string;
+	insert: InsertImage | InsertVideo | InsertCard | Vote | Emoji | string;
 	attributes?: Attributes;
 }
 
 export interface InsertImage {
 	image: string;
+	describe?: string;
 }
 
 export interface InsertVideo {
 	video: string;
+	describe?: string;
 }
 
 export interface Vote {
@@ -334,6 +336,18 @@ export interface VoteDetails {
 	end_time_type: string;
 	sync_end_time_type: boolean;
 	status: string;
+}
+
+export interface InsertCard {
+	card_group: {
+		article_cards: ArticleCard[];
+	};
+}
+
+export interface ArticleCard {
+	meta: Metadata;
+	info: ArticleInfo;
+	user: ArticleUser;
 }
 
 export interface Emoji {
@@ -362,4 +376,32 @@ export interface Attributes {
 	height?: number;
 	width?: number;
 	size?: string;
+}
+
+export interface Metadata {
+	type: number;
+	meta_id: string;
+	origin_url: string;
+}
+
+export interface ArticleInfo {
+	title: string;
+	cover: string;
+	has_cover: boolean;
+	view_num: string;
+	created_at: string;
+	status: number;
+	tip_msg: string;
+	type_desc: string;
+	view_type: number;
+	sub_type: number;
+	jump_url: string;
+}
+
+export interface ArticleUser {
+	uid: string;
+	avatar: string;
+	icon_url: string;
+	nickname: string;
+	is_owner: boolean;
 }

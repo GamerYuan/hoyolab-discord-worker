@@ -1,0 +1,20 @@
+{
+	"subscriptions": [
+		{
+			"uid": 1015537,
+			"webhooks": [
+				{
+					"key": "WEBHOOK_A",
+					"roles": ["704963547248703428", "130349517473811392"],
+					"language": "en-us"
+				},
+				{
+					"key": "WEBHOOK_B",
+					"roles": [],
+					"language": "zh-cn"
+				}
+			]
+		}
+	],
+	"use_components": true
+}
