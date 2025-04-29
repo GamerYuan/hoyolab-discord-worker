@@ -1,6 +1,6 @@
 import { Message, Embed } from './types/discord_embed';
 import { InsertCard, InsertVideo, PostData, PostDetail, StructuredInsert, Vote } from './types/hoyolab_post';
-import { LANG_DETAILS, LANG_ABBR, FOOTER_TEXT, DEFAULT_HEADER_DICT } from './types/constants';
+import { LOCALISATION_STRINGS, LANG_ABBR, DEFAULT_HEADER_DICT } from './types/constants';
 import { Button, Component, Container, MediaGallery, Section, Separator, TextDisplay } from './types/components_v2';
 // Import from the new config.json file
 import SETTINGS from '../config.json';
@@ -12,6 +12,7 @@ const COMPONENT_LIMIT = 5;
 
 async function buildMessage(postID: number, lang: string, postLen: number): Promise<Embed> {
 	const postDetail = await fetchPostDetail(postID, lang);
+	const currentLang = postDetail.data.post.post.lang;
 	const base: Partial<Embed> = {
 		color: 7436279,
 		url: `https://www.hoyolab.com/article/${postDetail.data.post.post.post_id}`,
@@ -22,8 +23,8 @@ async function buildMessage(postID: number, lang: string, postLen: number): Prom
 		},
 		footer: {
 			text:
-				postDetail.data.post.post.origin_lang != postDetail.data.post.post.lang
-					? `HoYoLAB · ${FOOTER_TEXT[LANG_ABBR.indexOf(postDetail.data.post.post.lang)]}`
+				postDetail.data.post.post.origin_lang != currentLang
+					? `HoYoLAB · ${LOCALISATION_STRINGS[currentLang].footer}` // Updated reference
 					: 'HoYoLAB',
 			icon_url: 'https://media.discordapp.net/attachments/943106145546014732/1137378106135564358/favicon.png',
 		},
@@ -47,9 +48,10 @@ async function buildMessage(postID: number, lang: string, postLen: number): Prom
 
 async function buildMessageComponent(postDetail: PostData, lang: string, postLen: number): Promise<Container> {
 	const base: Container = new Container();
+	const currentLang = postDetail.data.post.post.lang;
 	const footer =
-		postDetail.data.post.post.origin_lang != postDetail.data.post.post.lang
-			? `-# HoYoLAB · ${FOOTER_TEXT[LANG_ABBR.indexOf(postDetail.data.post.post.lang)]} · <t:${postDetail.data.post.post.created_at}:F>`
+		postDetail.data.post.post.origin_lang != currentLang
+			? `-# HoYoLAB · ${LOCALISATION_STRINGS[currentLang].footer} · <t:${postDetail.data.post.post.created_at}:F>` // Updated reference
 			: `-# HoYoLAB · <t:${postDetail.data.post.post.created_at}:F>`;
 
 	base.components.push(
@@ -167,7 +169,7 @@ export async function pushMessage(content: Message, webhook: string) {
 }
 
 export async function fetchPostDetail(postID: number, lang: string): Promise<PostData> {
-	const target = `${POST_DATA}?post_id=${postID}`;
+	const target = `${POST_DATA}?post_id=${postID}&scene=1`;
 	const requestHeader = DEFAULT_HEADER_DICT;
 	requestHeader['X-Rpc-Language'] = lang;
 	const response = await fetch(target, {
@@ -187,6 +189,7 @@ export function buildPostDetail(post: PostData, postLen: number): string {
 
 	let final: string = '';
 	let currLen: number = post.data.post.post.subject.length;
+	const currentLang = post.data.post.post.lang; // Get current language once
 
 	for (let i = 0; i < content.length; i++) {
 		let elem = content[i];
@@ -244,7 +247,7 @@ export function buildPostDetail(post: PostData, postLen: number): string {
 		}
 
 		if (currLen >= postLen) {
-			const detailString = LANG_DETAILS[LANG_ABBR.findIndex((x) => x === post.data.post.post.lang)];
+			const detailString = LOCALISATION_STRINGS[currentLang].details; // Updated reference
 
 			if (elemType === ElementType.TEXT) {
 				const lastBoundary = final.substring(0, postLen).lastIndexOf(' ');
@@ -275,6 +278,7 @@ export function buildPostDetailComponent(post: PostData, postLen: number): Compo
 		return components;
 	}
 	let currLen = 0;
+	const currentLang = post.data.post.post.lang; // Get current language once
 
 	for (let i = 0; i < content.length; i++) {
 		let elem = content[i];
@@ -303,26 +307,26 @@ export function buildPostDetailComponent(post: PostData, postLen: number): Compo
 				break;
 			case ElementType.VIDEO:
 				const videoSection = new Section();
-				videoSection.components.push(new TextDisplay('[Video]'));
-				videoSection.accessory = new Button('Watch Video Here!', 5);
+				videoSection.components.push(new TextDisplay(`[${LOCALISATION_STRINGS[currentLang].video}]`)); // Use localisation string
+				videoSection.accessory = new Button(LOCALISATION_STRINGS[currentLang].video_button, 5); // Use localisation string
 				videoSection.accessory.url = (elem.insert as InsertVideo).video;
 				components.push(videoSection);
 				if (components.length >= COMPONENT_LIMIT) {
 					break;
 				}
-				currLen += 7;
+				currLen += LOCALISATION_STRINGS[currentLang].video.length + 2; // Adjust length calculation
 				break;
 			case ElementType.VOTE:
 				const voteSection = new Section();
 				const vote = elem.insert as Vote;
 				voteSection.components.push(new TextDisplay(vote.vote.title));
-				voteSection.accessory = new Button('Vote Here!', 5);
+				voteSection.accessory = new Button(LOCALISATION_STRINGS[currentLang].vote_button, 5); // Use localisation string
 				voteSection.accessory.url = `https://www.hoyolab.com/article/${post.data.post.post.post_id}`;
 				components.push(voteSection);
 				if (components.length >= COMPONENT_LIMIT) {
 					break;
 				}
-				currLen += 10;
+				currLen += vote.vote.title.length; // Adjust length calculation
 				break;
 			case ElementType.LINK:
 				const link = elem.attributes?.link;
@@ -367,7 +371,7 @@ export function buildPostDetailComponent(post: PostData, postLen: number): Compo
 		}
 
 		if (currLen >= postLen) {
-			const detailString = LANG_DETAILS[LANG_ABBR.findIndex((x) => x === post.data.post.post.lang)];
+			const detailString = LOCALISATION_STRINGS[currentLang].details; // Updated reference
 
 			if (components[components.length - 1] instanceof TextDisplay) {
 				const text = components[components.length - 1] as TextDisplay;
