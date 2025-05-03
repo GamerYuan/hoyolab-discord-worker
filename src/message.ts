@@ -204,9 +204,12 @@ export function buildPostDetail(post: PostData, postLen: number): string {
 			case ElementType.ARTICLE:
 				continue;
 			case ElementType.VIDEO:
-				const insertVideo = `\n[[VIDEO]](${(elem.insert as InsertVideo).video})\n`;
-				final += insertVideo;
-				currLen += insertVideo.length;
+				const insertVideo = elem.insert as InsertVideo;
+				const url = `\n[[${LOCALISATION_STRINGS[currentLang].video}]](${
+					URL_RE.test(insertVideo.video) ? insertVideo.video : `https://www.hoyolab.com/article/${post.data.post.post.post_id}`
+				})\n`;
+				final += url;
+				currLen += url.length;
 				break;
 			case ElementType.VOTE:
 				const vote = elem.insert as Vote;
@@ -306,10 +309,13 @@ export function buildPostDetailComponent(post: PostData, postLen: number): Compo
 				}
 				break;
 			case ElementType.VIDEO:
+				const insertVideo = elem.insert as InsertVideo;
 				const videoSection = new Section();
 				videoSection.components.push(new TextDisplay(`[${LOCALISATION_STRINGS[currentLang].video}]`)); // Use localisation string
 				videoSection.accessory = new Button(LOCALISATION_STRINGS[currentLang].video_button, 5); // Use localisation string
-				videoSection.accessory.url = (elem.insert as InsertVideo).video;
+				videoSection.accessory.url = URL_RE.test(insertVideo.video)
+					? insertVideo.video
+					: `https://www.hoyolab.com/article/${post.data.post.post.post_id}`;
 				components.push(videoSection);
 				if (components.length >= COMPONENT_LIMIT) {
 					break;

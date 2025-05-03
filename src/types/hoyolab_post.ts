@@ -26,7 +26,7 @@ export interface Post {
 	last_modify_time: number;
 	contribution: any;
 	classification: Classification;
-	video: any;
+	video: VideoDetails;
 	game: Game;
 	data_box: string;
 	is_top_icon: boolean;
@@ -295,6 +295,34 @@ export interface CoverList {
 	tag_info: TagInfo;
 	template_info: any;
 	image_id: string;
+}
+
+export interface VideoDetails {
+	id: string;
+	cover: string;
+	url: string;
+	is_vertical: boolean;
+	sub_type: number;
+	resolution: Resolution[];
+	status: string;
+	cover_meta: CoverMeta;
+}
+
+export interface Resolution {
+	name: string;
+	height: string;
+	width: string;
+	url: string;
+	duration: string;
+}
+
+export interface CoverMeta {
+	url: string;
+	height: number;
+	width: number;
+	format: string;
+	size: string;
+	spoiler: boolean;
 }
 
 export interface VoteSummary {
