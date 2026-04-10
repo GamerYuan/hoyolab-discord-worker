@@ -1,49 +1,12 @@
-import { Message, Embed } from './types/discord_embed';
-import { InsertCard, InsertVideo, PostData, PostDetail, StructuredInsert, Vote } from './types/hoyolab_post';
+import { Message } from './types/webhook';
+import { InsertCard, InsertVideo, PostData, StructuredInsert, Vote } from './types/hoyolab_post';
 import { LOCALISATION_STRINGS, DEFAULT_HEADER_DICT } from './types/localisation';
 import { Button, Component, Container, MediaGallery, Section, Separator, TextDisplay } from './types/components_v2';
-import SETTINGS from '../config.json';
 
 const POST_DATA = 'https://bbs-api-os.hoyolab.com/community/post/wapi/getPostFull';
 const URL_RE = new RegExp(/(https?:\/\/)(.*)\b/, 'g');
 const ESC_RE = new RegExp(/((?<=^\d)\.)|(\*)|(^\-)/, 'gm');
 const COMPONENT_LIMIT = 5;
-
-async function buildMessage(postID: number, lang: string, postLen: number): Promise<Embed> {
-	const postDetail = await fetchPostDetail(postID, lang);
-	const currentLang = postDetail.data.post.post.lang;
-	const base: Partial<Embed> = {
-		color: 7436279,
-		url: `https://www.hoyolab.com/article/${postDetail.data.post.post.post_id}`,
-		author: {
-			name: postDetail.data.post.user.nickname,
-			url: `https://www.hoyolab.com/accountCenter/postList?id=${postDetail.data.post.user.uid}`,
-			icon_url: postDetail.data.post.user.avatar_url,
-		},
-		footer: {
-			text:
-				postDetail.data.post.post.origin_lang != currentLang
-					? `HoYoLAB · ${LOCALISATION_STRINGS[currentLang].footer}` // Updated reference
-					: 'HoYoLAB',
-			icon_url: 'https://media.discordapp.net/attachments/943106145546014732/1137378106135564358/favicon.png',
-		},
-		timestamp: new Date(postDetail.data.post.post.created_at * 1000),
-		title: postDetail.data.post.post.subject,
-		description: buildPostDetail(postDetail, postLen),
-	};
-
-	if (postDetail.data.post.cover_list.length > 0) {
-		base.image = {
-			url: postDetail.data.post.cover_list[0].url,
-		};
-	} else if (postDetail.data.post.image_list.length > 0) {
-		base.image = {
-			url: postDetail.data.post.image_list[0].url,
-		};
-	}
-
-	return base;
-}
 
 async function buildMessageComponent(postDetail: PostData, lang: string, postLen: number): Promise<Container> {
 	const base: Container = new Container();
@@ -54,10 +17,10 @@ async function buildMessageComponent(postDetail: PostData, lang: string, postLen
 			: `-# HoYoLAB · <t:${postDetail.data.post.post.created_at}:F>`;
 
 	base.components.push(
-		new TextDisplay(`## [${postDetail.data.post.post.subject}](https://www.hoyolab.com/article/${postDetail.data.post.post.post_id})`)
+		new TextDisplay(`## [${postDetail.data.post.post.subject}](https://www.hoyolab.com/article/${postDetail.data.post.post.post_id})`),
 	);
 	base.components = base.components.concat(
-		buildPostDetailComponent(postDetail, postLen - (base.components[0] as TextDisplay).content.length - footer.length)
+		buildPostDetailComponent(postDetail, postLen - (base.components[0] as TextDisplay).content.length - footer.length),
 	);
 
 	if (postDetail.data.post.cover_list.length > 0) {
@@ -104,42 +67,33 @@ export async function pushToDiscord(posts: number[], webhooks: string, roles: re
 	const list = webhooks.split(',');
 	// Sends from oldest to newest
 	const webhookPayload: Message = {};
-	const postLen = Math.max(600, Math.min(1000, SETTINGS.use_components ? 3500 : 6000 / posts.length));
-	if (!SETTINGS.use_components) {
-		webhookPayload.embeds = await Promise.all(posts.slice(0, 10).map(async (post) => await buildMessage(post, lang, postLen)));
-		if (roles && roles.length > 0) {
-			webhookPayload.content = roles.map((role) => `@<&${role}>`).join('');
-			webhookPayload.allowed_mentions = {
-				parse: ['roles'],
-			};
-		}
-	} else {
-		let totalComponentCount = 0;
-		const containers: Container[] = [];
-		const latestPosts = posts.slice(0, 10).map(async (id) => await fetchPostDetail(id, lang));
+	const postLen = Math.max(600, Math.min(1000, 3500));
 
-		for (const post of latestPosts) {
-			const container = await buildMessageComponent(await post, lang, postLen);
-			const containerComponentCount = countAllComponents(container);
-			if (totalComponentCount + containerComponentCount >= 30) {
-				break;
+	let totalComponentCount = 0;
+	const containers: Container[] = [];
+	const latestPosts = posts.slice(0, 10).map(async (id) => await fetchPostDetail(id, lang));
+
+	for (const post of latestPosts) {
+		const container = await buildMessageComponent(await post, lang, postLen);
+		const containerComponentCount = countAllComponents(container);
+		if (totalComponentCount + containerComponentCount >= 30) {
+			break;
+		}
+		containers.unshift(container);
+		totalComponentCount += containerComponentCount;
+	}
+
+	webhookPayload.components = containers;
+	webhookPayload.flags = 32768;
+	webhookPayload.username = (await latestPosts[0]).data.post.user.nickname;
+	webhookPayload.avatar_url = (await latestPosts[0]).data.post.user.avatar_url;
+	if (roles && roles.length > 0) {
+		const roleString = roles.map((role) => `<@&${role}>`).join('');
+		webhookPayload.components.map((container) => {
+			if (container instanceof Container) {
+				(container.components[container.components.length - 1] as TextDisplay).content += ` · ${roleString}`;
 			}
-			containers.unshift(container);
-			totalComponentCount += containerComponentCount;
-		}
-
-		webhookPayload.components = containers;
-		webhookPayload.flags = 32768;
-		webhookPayload.username = (await latestPosts[0]).data.post.user.nickname;
-		webhookPayload.avatar_url = (await latestPosts[0]).data.post.user.avatar_url;
-		if (roles && roles.length > 0) {
-			const roleString = roles.map((role) => `@<&${role}>`).join('');
-			webhookPayload.components.map((container) => {
-				if (container instanceof Container) {
-					(container.components[container.components.length - 1] as TextDisplay).content += ` · ${roleString}`;
-				}
-			});
-		}
+		});
 	}
 
 	const payloads = [];
@@ -152,7 +106,7 @@ export async function pushToDiscord(posts: number[], webhooks: string, roles: re
 export async function pushMessage(content: Message, webhook: string) {
 	const bodyStr = JSON.stringify(content);
 	console.log(`Payload: ${bodyStr}`);
-	const response = await fetch(SETTINGS.use_components ? `${webhook}?with_components=true` : webhook, {
+	const response = await fetch(`${webhook}?with_components=true`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -177,92 +131,6 @@ export async function fetchPostDetail(postID: number, lang: string): Promise<Pos
 	});
 
 	return await response.json<PostData>();
-}
-
-export function buildPostDetail(post: PostData, postLen: number): string {
-	const content: StructuredInsert[] = JSON.parse(post.data.post.post.structured_content);
-
-	if (!Array.isArray(content) || content.length == 0) {
-		return '';
-	}
-
-	let final: string = '';
-	let currLen: number = post.data.post.post.subject.length;
-	const currentLang = post.data.post.post.lang; // Get current language once
-
-	for (let i = 0; i < content.length; i++) {
-		let elem = content[i];
-		const elemType = getElementType(elem);
-
-		switch (elemType) {
-			case ElementType.IMAGE:
-				continue;
-			case ElementType.EMOJI:
-				continue;
-			case ElementType.NONE:
-				continue;
-			case ElementType.ARTICLE:
-				continue;
-			case ElementType.VIDEO:
-				const insertVideo = elem.insert as InsertVideo;
-				const url = `\n[[${LOCALISATION_STRINGS[currentLang].video}]](${
-					URL_RE.test(insertVideo.video) ? insertVideo.video : `https://www.hoyolab.com/article/${post.data.post.post.post_id}`
-				})\n`;
-				final += url;
-				currLen += url.length;
-				break;
-			case ElementType.VOTE:
-				const vote = elem.insert as Vote;
-				const insertVote = `\n[VOTE]: ${vote.vote.title}\n`;
-				final += insertVote;
-				currLen += insertVote.length;
-				break;
-			case ElementType.LINK:
-				const link = elem.attributes?.link;
-				if (!link) break;
-				const insertText = elem.insert as string;
-				let linkText: string;
-
-				if (link.trim() === insertText.trim()) {
-					linkText = insertText;
-				} else if (insertText.trim().match(URL_RE)) {
-					linkText = link.trim();
-				} else {
-					linkText = `[${insertText}](${link.trim()})`;
-				}
-
-				final += linkText;
-				currLen += linkText.length;
-				break;
-			case ElementType.TEXT:
-				const str = elem.insert as string;
-				const formattedText = str
-					.replace(URL_RE, (url) => `\0${url}\0`)
-					.split('\0')
-					.map((part) => (URL_RE.test(part) ? part : part.replace(ESC_RE, '\\$&')))
-					.join('');
-				final += formattedText;
-				currLen += formattedText.length;
-				break;
-			default:
-				break;
-		}
-
-		if (currLen >= postLen) {
-			const detailString = LOCALISATION_STRINGS[currentLang].details; // Updated reference
-
-			if (elemType === ElementType.TEXT) {
-				const lastBoundary = final.substring(0, postLen).lastIndexOf(' ');
-				final = `${final.substring(0, lastBoundary)}...\n\n${detailString}`;
-			} else {
-				final += `\n\n${detailString}`;
-			}
-
-			break;
-		}
-	}
-
-	return final.trimStart();
 }
 
 export function buildPostDetailComponent(post: PostData, postLen: number): Component[] {
@@ -300,7 +168,7 @@ export function buildPostDetailComponent(post: PostData, postLen: number): Compo
 				for (let j = 0; j < article.card_group.article_cards.length && j < 3 && components.length < COMPONENT_LIMIT; j++) {
 					const articleSection = new Section();
 					articleSection.components.push(
-						new TextDisplay(`${article.card_group.article_cards[j].info.title}\n-# ${article.card_group.article_cards[j].user.nickname}`)
+						new TextDisplay(`${article.card_group.article_cards[j].info.title}\n-# ${article.card_group.article_cards[j].user.nickname}`),
 					);
 					articleSection.accessory = new Button(LOCALISATION_STRINGS[currentLang].article_button, 5);
 					articleSection.accessory.url = `https://www.hoyolab.com/article/${article.card_group.article_cards[j].meta.meta_id}`;

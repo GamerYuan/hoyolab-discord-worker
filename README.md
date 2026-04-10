@@ -8,9 +8,9 @@ Cloudflare Workers is a freemium network service by Cloudflare. You can host you
 
 ## Features
 
-- Automatically receives webhook messages when the accounts you follow post on HoYoLAB (up to 1min delay due to CRON limitations)
-- Well-formatted webhook messages
-- Configure primary language of webhook messages (translation made with HoYoLAB's API, official posts will be displayed in its respective language)
+- Automatically receives webhook messages when the accounts you follow post on HoYoLAB
+- Well-formatted webhook messages with Discord's Components V2
+- Configure primary language of webhook messages (translated through HoYoLAB's API, official posts will be displayed in its respective language)
 
 ## Requirements
 
@@ -34,7 +34,7 @@ Download and extract the repository
 Setup the repository by running the following command in the `hoyolab-discord-worker` folder:
 
 ```
-npm i
+npm ci
 ```
 
 ## Deploying
@@ -100,8 +100,7 @@ Then open `config.json` and configure the accounts to follow and webhooks to use
 				}
 			]
 		}
-	],
-	"use_components": true
+	]
 }
 ```
 
@@ -146,12 +145,6 @@ Finally, deploy this worker again before you configure Discord Webhooks.
 ```
 npx wrangler deploy
 ```
-
-### Enabling Discord Components V2
-
-Components V2 support has been added with this commit. To enable Components V2, simply change the `use_components` option to `true` in `config.json`.
-
-_Components V2 support is still in preview, please file any issues or feedback you have regarding Components V2 support in the Issues tab_
 
 ## Configuring Discord Webhook
 
@@ -204,7 +197,7 @@ Each subscription incurs the following usage:
 - 2 Read Operations:
   - Retrieve last sent post data
   - Retrieve Discord Webhook URL
-- 1 Write Operation when sending a new batch of embeds
+- 1 Write Operation when sending a new batch of messages
 
 This totals to an average of 2880 Operations (Write Operations are negligible) daily if CRON Triggers are scheduled every minute (default). You can manage around 34 account `subscriptions` at this rate.
 

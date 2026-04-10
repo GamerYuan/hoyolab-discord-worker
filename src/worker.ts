@@ -14,7 +14,7 @@
 
 import { Router } from 'itty-router';
 import { fetchMessageList, onScheduled } from './triggers';
-import { fetchPostDetail, buildPostDetail, pushMessage, pushToDiscord, buildPostDetailComponent } from './message';
+import { fetchPostDetail, pushMessage, pushToDiscord, buildPostDetailComponent } from './message';
 import { Post } from './types/hoyolab_post';
 import { LANG_ABBR } from './types/localisation';
 
@@ -90,13 +90,6 @@ export default {
 				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
 				const data = await fetchPostDetail(Number(params!.id), lang);
 				return Response.json(data);
-			})
-			.get('/test_message/:id', async ({ params, query }) => {
-				const lang = (query?.lang as string) == undefined ? 'en-us' : (query?.lang as string);
-				if (!LANG_ABBR.includes(lang)) return new Response('Language not supported');
-				const data = await fetchPostDetail(Number(params!.id), lang);
-				const message = buildPostDetail(data, 1000);
-				return new Response(message);
 			})
 			.get('/test_message_component/:id', async ({ params, query }) => {
 				const lang = (query?.lang as string) == undefined ? 'en-us' : (query?.lang as string);
