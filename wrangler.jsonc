@@ -1,0 +1,22 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "hoyolab-discord-worker",
+	"main": "src/worker.ts",
+	"compatibility_date": "2023-05-15",
+	"kv_namespaces": [
+		{
+			"binding": "POST_CACHE",
+			"id": "4797a5b5ec8c4363837b6b34e14a7f01",
+		},
+		{
+			"binding": "WEBHOOKS",
+			"id": "b744a7f186f1413f9f88e882263bcdae",
+		},
+	],
+	"triggers": {
+		"crons": ["1/5 * * * *"],
+	},
+	"observability": {
+		"enabled": true,
+	},
+}
