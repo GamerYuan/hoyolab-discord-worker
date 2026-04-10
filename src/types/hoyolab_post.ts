@@ -398,6 +398,7 @@ export interface Emoticon {
 export interface Attributes {
 	link?: string;
 	header?: number;
+	list?: string;
 	align?: string;
 	color?: string;
 	background?: string;
