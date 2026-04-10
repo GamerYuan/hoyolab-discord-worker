@@ -53,25 +53,33 @@ npx wrangler deploy
 
 Then open [Cloudflare Workers Dashboard](https://dash.cloudflare.com/) on your browser
 
-Head over to Workers & Pages > KV, and create 2 new namespaces: `hyl-post-cache` and `hyl-webhook`. _You can choose a different name_
+Head over to Storage & Databases > Workers KV, and create 2 new instances: `hyl-post-cache` and `hyl-webhook`. _You can choose a different name_
 
-Then copy their IDs and open wrangler.toml in the local repository folder.
+Then copy their IDs and open wrangler.jsonc in the local repository folder.
 
-```toml
-name = "hoyolab-discord-worker"
-main = "src/worker.ts"
-compatibility_date = "2023-05-15"
-
-[[kv_namespaces]]
-binding = "POST_CACHE" # <-- DO NOT CHANGE
-id = "4797a5b5ec8c4363837b6b34e14a7f01" # <-- change this to the ID of hyl-post-cache
-
-[[kv_namespaces]]
-binding = "WEBHOOKS" # <-- DO NOT CHANGE
-id = "b744a7f186f1413f9f88e882263bcdae" # <-- change this to the ID of hyl-webhook
-
-[triggers]
-crons = ["* * * * *"] # * * * * * = run every minute
+```jsonc
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "hoyolab-discord-worker",
+	"main": "src/worker.ts",
+	"compatibility_date": "2023-05-15",
+	"kv_namespaces": [
+		{
+			"binding": "POST_CACHE", // DO NOT CHANGE
+			"id": "4797a5b5ec8c4363837b6b34e14a7f01", // <-- Change this to ID of hyl-post-cache
+		},
+		{
+			"binding": "WEBHOOKS", // DO NOT CHANGE
+			"id": "b744a7f186f1413f9f88e882263bcdae", // <-- Change this to ID of hyl-webhook
+		},
+	],
+	"triggers": {
+		"crons": ["1/5 * * * *"], // <-- Modify this CRON Expression if required
+	},
+	"observability": {
+		"enabled": true,
+	},
+}
 ```
 
 Change the ID of `POST_CACHE` and `WEBHOOKS` kv_namespaces to the `Namespace ID` newly created KV Namespaces respectively
@@ -152,7 +160,7 @@ To configure a Discord Webhook and link it to this service, first go to your ser
 
 Click on Edit Channel, go to Integrations > Webhooks, and create a New Webhook (Or use an existing webhook). Then copy its Webhook URL.
 
-Go to your Cloudflare Dashboard, Workers & Pages > KV, and open the `hyl-webhooks` namespace (or whatever you have named it previously with the same purpose). Then add an entry. The Key will be the `Webhook Alias` you have provided in the `config.json` file, and the Value will be the `Webhook URL` you have copied from Discord. Once you are done, click Add Entry, and you should see the new entry showing up in the page.
+Go to your Cloudflare Dashboard, Storage & Databases > Workers KV, and open the `hyl-webhook` namespace (or whatever you have named it previously with the same purpose). Then go to KV Pairs and add an entry. The Key will be the `Webhook Alias` you have provided in the `config.json` file, and the Value will be the `Webhook URL` you have copied from Discord. Once you are done, click Add Entry, and you should see the new entry showing up in the page.
 
 Example:
 
@@ -208,7 +216,3 @@ The free tier of `Cloudflare Workers` supports 5 `CRON Triggers` total, shared a
 ### Open Connections
 
 The free tier of `Cloudflare Workers` supports up to 6 simultaneous open connections. Additional connections will be placed in a queue, incurring more CPU time. This may limit the maximum number of `subscriptions`.
-
-### Discord Rate Limit
-
-Discord has recently started to severely rate limit requests sent from Cloudflare Worker IPs. This may cause a delay in the webhook posts sent but the unsent/delayed posts will not be lost. Discord developers were made aware of this issue and is currently working on a fix.
